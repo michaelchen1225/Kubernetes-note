@@ -11,6 +11,8 @@
 
 * 部署他人分享的 Chart
 
+* 建立自己的 helm chart repository：以 Gitlab 為例
+
 * Helm 的常用指令彙整
 
 今天是「Basic Concept」章節的最後一篇，我們來看一個好用的套件管理工具：Helm。
@@ -58,6 +60,11 @@ helm version
 輸出：
 ```text
 version.BuildInfo{Version:"v3.15.4", GitCommit:"fa9efb07d9d8debbb4306d72af76a383895aa8c4", GitTreeState:"clean", GoVersion:"go1.22.6"}
+```
+
+> 若有需要，可以使用以下指令啟用 helm bash completion：
+```bash
+helm completion bash > /etc/bash_completion.d/helm
 ```
 
 ### Helm 的實作：建立並部署第一個 Chart
@@ -337,11 +344,12 @@ kubectl get deploy first-chart-nginx-deploy -o jsonpath='{.spec.template.spec.co
 nginx:1.16
 ```
 
-也可以使用 `--values` 來指定一個 yaml 檔案來取代原本的 values.yaml，這樣就能更方便的管理不同環境的設定：
+也可以使用 `--values` 來指定一個新的 yaml 檔案來覆蓋原本 values.yaml 中的某些設定，這樣就能更方便的管理不同環境的設定：
 
 ```bash
 helm install new-value-chart ./helm-demo --values <path-to-other-values.yaml>
 ```
+> 若新 values.yaml 沒有針對舊 values.yaml 中的某些設定做修改，就會沿用舊的設定。可以在安裝 helm install 時加上 `--dry-run` 來驗證一下。
 
 ### 打包 Chart 並分享
 
@@ -355,7 +363,50 @@ helm package ./helm-demo
 Successfully packaged chart and saved it to: /root/helm-demo-0.1.0.tgz
 ```
 
-### 建立 helm chart repository：以 Gitlab 為例
+
+### 部署他人分享的 Chart
+
+Helm 的 chart 也有類似 Github 的平台來分享，來源分為以下兩者：
+
+1. Artifact Hub
+2. 自行加入的 repository
+
+**安裝 Artifact Hub 上的 Chart**
+
+* 前往 [Artifact Hub](https://artifacthub.io/) 搜尋你想要的 Chart，例如：`nginx`。點進去後可以看到這個 Chart 的相關資訊，包含了安裝方式、相依性等。
+
+**加入他人的 repository**
+
+* 使用以下指令加入 repository：
+```bash
+helm repo add <repo-name> <repo-url>
+```
+
+* 加入後，就可以從這個 repository 安裝 Chart：
+```bash
+helm install <release-name> <repo-name>/<chart-name>
+```
+
+* 如果來源 repo 有釋出更新，我們在更新之前，必須先更新來源 repo 的狀態：
+```bash
+helm repo update
+```
+> 就像平常下載前要先 apt update 一樣
+
+* 如果想要查看目前已加入的 repository，可以使用：
+```bash
+helm repo list
+```
+
+* 如果想要移除 repository，可以使用：
+```bash
+helm repo remove <repo-name>
+```
+
+
+### 建立自己的 helm chart repository：以 Gitlab 為例
+
+以下我們來實際建立一個自己的 helm chart repo，來實際操作上面提到的指令。
 
 一個標準的 helm chart repository 應該長這樣：
 
@@ -377,9 +428,12 @@ charts/
 mkdir helm-repo
 ```
 
-* 進入 helm-repo 後先打包 chart：
+* 在 Gitlab 上新增專案，叫做 helm-repo ，並把相關的設定處理好，讓本地的 helm-repo 能夠推送 commit 到 Gitlab 上。
+
+* 完成 Git 的設定後，cd 進入 helm-repo ，把 helm-demo 打包成 .tgz：
 
 ```bash
+cd helm-repo
 helm package /root/helm-demo
 ```
 ```text
@@ -389,10 +443,10 @@ Successfully packaged chart and saved it to: /root/helm-repo/helm-demo-0.1.0.tgz
 * 生成 index.yaml：
 
 ```bash
-helm repo index 
+helm repo index .
 ```
 
-* 新增 .gitlab-ci.yml，讓 Gitlab CI 在 push 後自動將 chart 丟上去：
+* 新增 .gitlab-ci.yml，讓 Gitlab CI 在 push 後自動將打包檔丟上去：
 
 ```yaml
 stages:
@@ -404,21 +458,24 @@ upload:
   script:
     - CHART=$(ls | grep .gz)
     - echo $CHART
-    - 'curl --fail-with-body --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@helm-demo-0.1.0.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"'
+    - 'curl --fail-with-body --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@$CHART" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"'
 ```
 
 * 提交變更到 Gitlab、等待 CI 完成後，前往左邊選單中的 `Deploy -> Package registry` 查看丟上去的 helm package：
 
-  ![alt text](image-2.png)
+  ![https://ithelp.ithome.com.tw/upload/images/20250206/20168692KEU5ey4qS5.png](https://ithelp.ithome.com.tw/upload/images/20250206/20168692KEU5ey4qS5.png)
 
 
-* 將這個 repository 加入 helm repo list 當中：
+* 將遠端的 helm repo 加入到 helm repo list 當中：
 
 ```bash
-helm repo add  my-helm-repo https://gitlab.com/api/v4/projects/<project-id>/packages/helm/stable
+helm repo add  my-repo https://gitlab.com/api/v4/projects/<project-id>/packages/helm/stable
 ```
+
 > gitlab 的 project-id 可以在 repo 首頁的右上角找到：
-![alt text](image-1.png)
+
+  ![https://ithelp.ithome.com.tw/upload/images/20250206/20168692IFQLolDpKE.png](https://ithelp.ithome.com.tw/upload/images/20250206/20168692IFQLolDpKE.png)
+    
 
 * 加入後 update 一下：
 
@@ -460,47 +517,6 @@ kubectl get all -n test-helm-demo
 
 * 若有修改原本的 chart，記得也要一起修改 Chart.yaml 中的 version 再使用 `helm package` 重新打包。
 
-
-
-### 部署他人分享的 Chart
-
-Helm 的 chart 也有類似 Github 的平台來分享，來源分為以下兩者：
-
-1. Artifact Hub
-2. 自行加入的 repository
-
-**安裝 Artifact Hub 上的 Chart**
-
-* 前往 [Artifact Hub](https://artifacthub.io/) 搜尋你想要的 Chart，例如：`nginx`。點進去後可以看到這個 Chart 的相關資訊，包含了安裝方式、相依性等。
-
-**安裝自行加入的 repository**
-
-* 使用以下指令加入 repository：
-```bash
-helm repo add <repo-name> <repo-url>
-```
-
-* 加入後，就可以從這個 repository 安裝 Chart：
-```bash
-helm install <release-name> <repo-name>/<chart-name>
-```
-
-* 如果想要更新 repository 的資訊，可以使用：
-```bash
-helm repo update
-```
-
-* 如果想要查看目前加入的 repository，可以使用：
-```bash
-helm repo list
-```
-
-* 如果想要移除 repository，可以使用：
-```bash
-helm repo remove <repo-name>
-```
-
-> 有關其他的 helm 指令用法，可以用善用 `-h` 來查看。
 
 ### Helm 的基本指令彙整
 

@@ -1,5 +1,3 @@
-# Day 05 -【Basic Concept】：Pod 中的環境變數與指令
-
 ### 今日目標
 
 * 設定 Pod 的環境變數
@@ -74,12 +72,15 @@ containers:
 kubectl run env-demo-3 --image busybox --env="USER=Mike" --env="PASSWORD=123456" --command -- sleep 300
 ```
 
-不過，當需要的環境變數開始變多時這樣設定非常沒有效率，且不易閱讀。這個問題我們暫且留到後續章節，介紹 ConfigMap 時再來解決。
+不過，當需要的環境變數開始變多時，這樣設定非常沒有效率且不易閱讀。這個問題我們暫且留到後續章節，介紹 ConfigMap 時再來解決。
 
-### 將 Pod 的資訊當作環境變數
+### 使用 downward API 將 Pod 的資訊當作環境變數
 
-當 Pod 跑起來後，我們可以將一些與 Pod 相關的變數當作環境變數，例如 Pod 的名稱、IP 等等，例如：
+當 Pod 跑起來後，我們可以將一些與 Pod 相關的資訊，透過「downward API」引入容器中當作環境變數，例如 Pod 的名稱、IP 等等。
 
+> **downward API**：允許容器在不經過 k8s client 端或 api-server 的情況下取得 Pod 的資訊。
+
+以下是一個簡單的範例：
 ```yaml
 # env-from-pod-info.yaml
 apiVersion: v1
@@ -224,7 +225,7 @@ docker run --name echo-1 michaelchenn1225/my-echo:v1
 1
 ```
 
-但是如果想要讓容器輸出「hello」，就必須把「echo hello」加在「ctr run」最後面，取代原本的「echo 1」:
+但是如果想要讓容器輸出「hello」，就必須把「echo hello」加在指令的最後面，取代原本的「echo 1」:
 ```bash
 docker run --name echo-hello michaelchenn1225/my-echo:v1 echo hello
 ```
@@ -385,7 +386,7 @@ CMD | args
 也就是在 Pod 的 yaml 中，command 欄位會取代 image 的 `ENTRYPOINT`，而 args 會取代原先 image 的 `CMD`。
 
 ---
-> **Tips**：執行長指令或多重指令
+> **Tips**：執行「長指令」或「多重指令」
 
 如果要執行一個長指令，在 yaml 中一直用雙引號格開會相當麻煩，因此可以使用以下小技巧：
 
@@ -399,6 +400,7 @@ spec:
   - name: long-command
     image: busybox
     command: ["/bin/sh", "-c", "while true; do echo hello; sleep 10; done"]
+# 透過 /bin/sh -c 來執行一長串指令，比起一個一個用雙引號隔開，現在只需要隔開 /bin/sh 與 -c 即可。
 ```
 
 有的時候我們會想執行多個指令，例如先輸出 hello，再等待 300 秒，可以這樣寫：
@@ -426,7 +428,7 @@ spec:
 *建立一個 Pod，包含兩個容器*：
 
 * 容器：
-  * 取名為 echo-user，使用 busybox 作為image ，定義一個環境變數為「myUser=u1」，先等待 10 秒後再將環境變數 u1。
+  * 取名為 echo-user，使用 busybox 作為image ，定義一個環境變數為「myUser=u1」，先等待 10 秒後再將環境變數 u1 輸出。
   * 取名為 echo-user-2，使用 busybox 作為image ，定義一個環境變數為「myUser=u2」，每隔 1 秒將 u2 輸出。
 
 * 建立 yaml 樣本：
@@ -499,3 +501,5 @@ u2
 * [CrashLoopBackOff status using busybox images](https://www.reddit.com/r/kubernetes/comments/jp2ia9/crashloopbackoff_status_using_busybox_images/):
 
 * [Kubernetes: Command and Arguments in Pod](https://yuminlee2.medium.com/kubernetes-command-and-arguments-in-pod-c3f1be61ba1a)
+
+* [Expose Pod Information to Containers Through Environment Variables](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)

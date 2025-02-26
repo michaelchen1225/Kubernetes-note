@@ -136,7 +136,7 @@ K8s 累積了相當龐大且活躍的開源生態，其中各種的插件與應�
 | Day 08 |[Namespace](https://ithelp.ithome.com.tw/articles/10346374)
 | Day 09 |[Service](https://ithelp.ithome.com.tw/articles/10346530)
 | Day 10 |[kubectl 基本操作彙整](https://ithelp.ithome.com.tw/articles/10346691)
-| Day 11 |[*好用的專案部署工具 --- Helm](https://ithelp.ithome.com.tw/articles/10346850)
+| Day 11 |[*專案的打包與部署 --- Helm](https://ithelp.ithome.com.tw/articles/10346850)
 
 2. **Storage**：
 

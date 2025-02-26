@@ -1,10 +1,12 @@
 ### 今日目標
 
-1. Kubernetes 的基本執行單位 --- Pod
+---
 
-2. Kubernetes 的架構 --- Cluster
+* Kubernetes 的基本執行單位 --- Pod
 
-3. Cluster 的基本硬體單位 --- Node
+* Kubernetes 的架構 --- Cluster
+
+* Cluster 的基本硬體單位 --- Node
 
   * Node 的必要組件：kubelet、container runtime、kube-proxy
 
@@ -12,8 +14,11 @@
 
   * Master Node 的特殊組件：kube-apiserver、etcd、kube-scheduler、kube-controller-manager
 
-3. 了解 HA cluster 的設計方式。
+* 了解 HA cluster 的設計方式。
 
+****
+
+在正式開始建置、操作 Kubernetes 之前，我們得先了解 k8s 的整體架構與組件，就像看一本推理小說，得先了解「有哪些角色？」、「這些角色之間的關係？」，才能看懂偵探的推理過程、或自己嘗試推理看看。
 
 > 底下會嘗試用一個**船隊**的比喻，來解釋 Kubernetes 的架構與組件。
 
@@ -49,21 +54,21 @@ K8s 是一個容器管理平台，這些被管理的容器(container)會在 **Po
 
 ## Cluster 的基本硬體單位 --- Node
 
-每個 Node 的必要組件如下：
+Node 提供了執行環境給 Pod，而一個 Node 的必要組件如下：
 
 1. **Kubelet** 
 
-   相當於每艘船 (也就是 Node) 上的**船長**，負責執行總指揮 (Master Node，等等會提到) 傳遞的命令。例如執行、刪除 Pod 等等。
+   相當於每艘船 (也就是 Node) 上的**船長**，負責執行總指揮 (Master Node，等等會提到) 傳遞的命令。例如執行、刪除 Pod、監控 Pod 的狀態等等。
 
 2. **Container Runtime**
 
    在 Pod 中執行的容器，都需要容器的「執行引擎」才能跑起來，這就是「container runtime」，常見的有Containerd、CRI-O 等。
 
-> 常聽到的 Docker 並不是 Container Runtime，而是「包含」著 Container Runtime 的容器管理工具，兩者間的關係可以參考[這篇文章](https://bluelight.co/blog/containerd-vs-docker#containerd-vs-docker-a-head-to-head-comparison)
+> 常聽到的 Docker 並不是 Container Runtime，而是「包含」著 Container Runtime 的容器管理工具，兩者間的關係可以參考[這篇文章](https://bluelight.co/blog/containerd-vs-docker#containerd-vs-docker-a-head-to-head-comparison)。
 
 3. **Kube-porxy**
 
-   Cluster 內部的 Pod 可以透過內部網路互相溝通，而 kube-proxy 則負責維護 cluster 內部網路的「路由規則」。
+   Cluster 內部的 Pod 可以透過內部網路互相溝通，外部使用者也可以存取到 Pod，這都有賴於 kube-proxy 維護 cluster 的「路由規則」。
 
 而因為 Node 的角色不同，又可分為以下兩種：
 
@@ -72,6 +77,8 @@ K8s 是一個容器管理平台，這些被管理的容器(container)會在 **Po
    又稱為「**Control Plane**」，負責管理與指揮整個 cluster，例如資源調度、cluster 的狀態監控等等。
    
    管理員可以透過 CLI (Command Line Interface) 或 API 來下達指令或任務給 Master Node。
+   
+   > K8s 的 CLI 是 **kubectl**，[明天](https://ithelp.ithome.com.tw/articles/10345660)會實際安裝。
 
 * **Worker Node** 
 
@@ -81,27 +88,31 @@ K8s 是一個容器管理平台，這些被管理的容器(container)會在 **Po
 
 ### Master Node 的特殊組件
 
-Master Node 身為整個船隊的**總指揮**，除了擁有上述提到的三個組件(kubelet、container runtime、kube-proxy)外，還有**額外四個**特殊的組件：
+Master Node 身為整個船隊的**總指揮**，除了擁有上述提到的三個組件(kubelet、container runtime、kube-proxy)外，還有額外四個特殊的組件：
 
 1. **kube-apiserver**
 
-    在整個 cluster 中，任何訊息的傳遞，都必須經過 kube-apiserver 的轉介。例如管理者對整個 cluster 下的指令、Node 與 Node 之間的溝通等等。訊息傳遞者的身分與授權，都屬於 kube-apiserver 的管轄範圍。
+    在整個 cluster 中，**任何**訊息的傳遞，都必須經過 kube-apiserver 的轉介。例如管理者對整個 cluster 下的指令、Node 與 Node 之間的溝通、訊息傳遞者的身分驗證與授權，都屬於 kube-apiserver 的管轄範圍。
     
     萬一 kube-apiserver 發生故障，就等於 cluster 的通訊系統癱瘓了，所以 kube-apisever 是一個極為重要的組件。
+    
+    另外，kube-apiserver 也會隨時監控 Pod 的狀態，這是透過與各個 Node 上的 kubelet 溝通來達成的。
 
 2. **etcd** 
 
-   以 key-value 的方式存放 cluster 中的資料，例如 cluster 的狀態、目前存在的資源等等。
+   以 key-value 的方式存放整個 cluster 中的資料，例如 cluster 的狀態、目前存在的資源等等。
    
    備份 etcd 是一項重要的工作，因為當整個 cluster 壞掉時，我們可以藉由還原 etcd 的備分來重建 cluster。
 
 3. **kube-scheduler**
 
    負責 cluster 中資源的調配，例如哪些 Pod 該放到哪個 Node 上。
+   > kube-scheduler 幫 Pod 找到目的 Node 後，scheduler 會通知 kube-apiserver，kube-apiserver 再通知目的 Node 的 kubelet 把 Pod 跑起來。
 
 4. **kube-controller-manager**:
 
-   Cluster 中的資源管理者，是許多控制器(例如: Node-Controller、Replication-Controller)的集合體，透過 kube-apiserver 監控各種資源，並將資源目前的狀態調整至「期望狀態(Desired status)」 。例如 controller-manager 透過 kube-apiserver 發現某個 Pod 壞掉時，controller-manager 會負責重新啟動該 Pod，直到它順利執行。
+   Cluster 各種物件的管理者，是許多控制器(例如: Node-Controller、Replication-Controller)的集合體，透過 kube-apiserver 監控各種資源，並將資源目前的狀態調整至「期望狀態(Desired status)」。例如 「順利執行」是 Pod 的期望狀態，當 controller-manager 透過 kube-apiserver 發現某個 Pod 壞掉時，controller-manager 會負責重新啟動該 Pod，直到它順利執行。
+   
 
 以上就是關於 Node 以及其組件的大致介紹。如果還是覺得有些混亂的話，這裡我們再次用船隊的比喻總結一下：
 
@@ -111,17 +122,20 @@ Master Node 身為整個船隊的**總指揮**，除了擁有上述提到的三�
 
 > 在船隊中擔任總指揮的主船 (Master Node)，則另外擁有這四個元件 : **kube-apiserver**、**etcd**、**kube-scheduler**、**kube-controller-manager**。
 
+> 總指揮(Master Node)的傳達給小船(Worker Node)的各種指令，都是由 kube-apiserver 發送給船長 kubelet 來完成的。
+
+
 這裡提供一張圖示：
 
 ![https://ithelp.ithome.com.tw/upload/images/20240820/20168692oKw0I7cTyY.png](https://ithelp.ithome.com.tw/upload/images/20240820/20168692oKw0I7cTyY.png)
 
-### HA Cluster
+## HA Cluster
 
-當 cluster 中僅存在一台 Master Node 時，如果 Master Node 發生故障，雖然在 Worker Node 上的 Pod 仍能正常運作，但是 cluster 的管理功能將會癱瘓，例如：因為缺少在 Master Node 上的 kube-controller-manager，所以當 Pod 發生故障時舊無法重啟。
+當 cluster 中僅存在一台 Master Node 時，如果 Master Node 發生故障，雖然在 Worker Node 上的 Pod 仍能正常運作，但是 cluster 的管理功能將會癱瘓，例如：因為缺少在 Master Node 上的 kube-apiserver，管理員就無法用指令或 API 來管理 cluster。
 
-為了避免這種情況，通常在生產環境中會建立一個**高可用性 (High Availability)** 的 cluster，也就是 HA cluster。
+為了避免這種情況，在實際的生產環境中通常會建立一個**高可用性 (High Availability)** 的 cluster，也就是 HA cluster。
 
-HA cluster 擁有**多個** Master Node，避免單點故障的情況發生。除此之外，因為多個 Master Node 的原因，etcd 儲存的資料也會有多個副本，這樣一來即使某個 etcd 發生故障，也能透過其他 etcd 的資料來恢復 cluster。
+所謂「高可用性」就是「提高容錯率」，HA cluster 擁有**多個** Master Node，避免單點故障的情況發生。除此之外，因為多個 Master Node 的原因，etcd 儲存的資料也會有多個副本，這樣一來即使某個 etcd 發生故障，也能透過其他 etcd 的資料來恢復 cluster。
 
 > 不過，多個 Master Node 上就代表著有多個 api-server，因此 HA cluster 會有一個**負載平衡器 (Load Balancer)** 來分配流量。
 
@@ -137,13 +151,13 @@ HA cluster 擁有**多個** Master Node，避免單點故障的情況發生。�
 
 * **External etcd topology**
 
-  External etcd topology **至少**需要三台 Master Node 與三台 etcd server。 將 etcd 獨立部署在另一台機器上，這樣一這樣的好處是可以避免同時失去 Master Node 與 etcd，但部署複雜度較高，且需額外負擔 etcd server 的成本，比 Stacked etcd 所需的 server 數量多出一倍。
+  External etcd topology **至少**需要三台 Master Node 與三台 etcd server。 將 etcd 獨立部署在另一台機器上，這樣一這樣的好處是可以避免同時失去 Master Node 與 etcd，但部署複雜度較高，且需額外負擔 etcd server 的成本，比起 Stacked etcd 所需的 server 數量多出一倍。
   
 ![https://ithelp.ithome.com.tw/upload/images/20240821/20168692PsNzn2GdZ3.png](https://ithelp.ithome.com.tw/upload/images/20240821/20168692PsNzn2GdZ3.png)
 
 [圖片來源](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/)
 
-> 總之，成本與風險之間的考量決定了我們選擇哪一種 topology。
+> 也就是說，「成本與風險」之間的考量決定了我們選擇哪一種 topology。
 
 你可能會好奇，為什麼兩種 topology都至少需要**三**個 etcd，而不是兩個、四個或其他數字？這是因為 K8s 採取了 **RAFT** 演算法來保證 etcd 的高可用性與資料一致性，該演算法會從 N 個 etcd 中選出一個作為 Leader，選舉過程大致如下：
 

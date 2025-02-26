@@ -1,19 +1,24 @@
 ### 今日目標
 
-* 了解如何建立 Pod
+---
+* 如何建立 Pod？
   * 使用 yaml 建立
   * 使用 kubectl 建立
   * 快速產生 yaml 樣本
 
 * 關於 Pod 的 kubectl 基本操作
 
-* Pod 的基本除錯 --- 使用 kubectl describe 和 kubectl logs
+* Pod 的基本除錯
+  * kubectl describe & kubectl logs
 
 * Multi-Container Pod
   * Init Container
   * Sidecar Container
+***
 
-### 如何建立 Pod？
+[昨天](https://ithelp.ithome.com.tw/articles/10345660)我們成功建立了練習用的 cluster，今天來試試看動手建立 k8s 的基本執行單位 --- Pod。
+
+## 如何建立 Pod？
 
 「Pod」是 K8s 的基本執行單位，可以用以下兩種方法來建立：
 
@@ -35,10 +40,16 @@
 
 直接來看一個 k8s 官網上的[範例](https://kubernetes.io/docs/concepts/workloads/pods/#using-pods)：
 
+* 下載範例檔：
 ```bash
 wget https://k8s.io/examples/pods/simple-pod.yaml
+```
+
+* 查看範例檔案：
+```
 cat simple-pod.yaml
 ```
+
 ```yaml
 # simple-pod.yaml
 apiVersion: v1
@@ -65,11 +76,11 @@ spec:
 
 * **metadata**：
   
-  描述這個物件的訊息，例如: name (名稱)、labels (標籤)、anottations (註釋) 等等。範例中這個 Pod 被命名為「nginx」。
+  描述這個物件的訊息，例如: `name` (名稱)、`labels` (標籤)、`anottations` (註釋) 等等。範例中這個 Pod 被命名為「nginx」。
 
 * **spec**：
   
-  定義了這個物件的規格，範例中的 spec.containers 欄位之下，定義了 Pod 中的容器該有哪些配置：
+  定義了這個物件的規格，範例中的 `spec.containers` 欄位之下，定義了 Pod 中的容器該有哪些配置：
    
    1. name：容器取名為「nginx」
 
@@ -78,7 +89,7 @@ spec:
    3. ports：容器會開放 port 80
 
 
-寫完 Pod 的 yaml 後，用以下的方式建立就能建立 Pod：
+看完 Pod 的 yaml 後，用以下方式就能建立範例檔(simple-pod.yaml)中定義的 Pod：
 
 ```bash
 kubectl apply -f simple-pod.yaml
@@ -88,7 +99,8 @@ kubectl apply -f simple-pod.yaml
 kubectl create -f simple-pod.yaml
 ```
 
-查看 nginx Pod 的狀態，可以看到是 Running 狀態：
+這樣就將 simple-pod.yaml 中的 nginx Pod 跑起來了。查看一下剛剛建立的 nginx Pod，可以看到是 Running 狀態：
+
 ```bash
 kubectl get pod nginx
 ```
@@ -108,12 +120,13 @@ nginx   1/1     Running   0          72s
 
   用於創建新的資源，如果指定 yaml 中的資源已經存在，則會出現錯誤，而不像 apply 那樣會更新資源。
 
+  
   總而言之 kubectl apply -f 是一個*更靈活*的指令，比較推薦使用。
 ***
 
-### 方法2: 使用 kubectl 指令建立 Pod
+### 方法2：使用 kubectl 指令建立 Pod
 
-用 kubectl run 指令來產生 Pod，指令格式如下：
+用 `kubectl run` 指令來產生新的 Pod，指令格式如下：
 
 ```bash
 kubectl run <pod-name> --image <image> --port <port> 
@@ -127,7 +140,7 @@ kubectl run nginx --image nginx:1.14.2 --port 80
 
 你可能會問，*那我幹嘛辛苦地寫一個 yaml，不是直接用指令就好了？*
 
-指令提供的是一個快速、便捷的方式來創建資源，但一些較為細節的設定還是需要透過 yaml 來配置。另外使用 yaml 還有這些好處：
+指令提供的是一個快速、便捷的方式來創建資源，但一些較為細節的設定還是需要透過 yaml 來配置，用指令是無法完成的。另外使用 yaml 還有這些好處：
 
    * **可讀性和維護性**：
      yaml 在複雜的應用之中，因為其書寫的結構方式，大大提升了閱讀與維護的速度。
@@ -139,7 +152,7 @@ kubectl run nginx --image nginx:1.14.2 --port 80
 
 既然指令的選項無法滿足需求時，還是需要用到 yaml，難道這時就要自己重頭到尾寫一份 yaml 嗎？
 
-其實還是可以使用指令的方式，先產生基本的 yaml **樣本**，隨後再利用文字編輯器(例如 vim、nano)進行符合要求的修改 :
+其實還是可以使用指令的方式，先產生基本的 yaml **樣本**，然後再利用文字編輯器(例如 vim、nano)進行符合要求的修改 :
 
 * 生成 yaml 的樣本:
 
@@ -157,7 +170,7 @@ kubectl run <pod-name> --image=<image> --dry-run=client -o yaml > <yaml-name>.ya
 
      指定輸出格式，這裡指定輸出為 yaml
      
-舉例來說，我們無法透過 kubectl run 建立一個包含多個容器的 Pod，不過我們可以先生成單一容器的 yaml 檔，再進行修改：
+舉例來說，我們無法透過 `kubectl run` 建立一個包含**多個容器**的 Pod，不過我們可以先生成單一容器的 yaml 檔，再進行修改：
 
 ```bash
 kubectl run multi-container-pod --image=nginx --dry-run=client -o yaml > multi-container-pod.yaml
@@ -205,18 +218,20 @@ multi-container-pod   2/2     Running   0          32s
 
 建立 Pod 之後，你可能會問：我要怎麼知道 Pod 有沒有正常運作？哪裡可以查看關於這個 Pod 的詳細資料？如何刪除 Pod？有沒有其他與 Pod 相關的指令可以使用？
 
-列出目前所有 Pod：
+> 有的，以下整理了關於 Pod 的基本操作：
+
+列出目前所有 Pod 的狀態：
 ```bash
 kubeclt get pod
 ```
-> 這樣講其實並不準確，不過因為還沒講到 namespace 的概念，所以先暫時這樣理解
+> 這樣講其實並不準確，不過因為還沒講到 namespace 的概念，所以先暫時這樣理解。( 有興趣的話可以先參考 [Day 08](https://ithelp.ithome.com.tw/articles/10346374) )
 
-持續的列出 Pod 的狀態：
+持續的輸出 Pod 的狀態：
 ```bash
 kubectl get pod -w
 ```
 
-查看 Pod 的詳細資訊，例如 Pod 的 status、events、容器名稱等等：
+查看 Pod 的詳細資訊，例如 Pod 的 status、events、Pod 中的容器名稱等等：
 ```bash
 kubectl describe pod <pod-name>
 ```
@@ -242,7 +257,7 @@ kubectl logs <pod-name> -c <container-name>
 kubectl logs multi-container-pod -c nginx
 ```
 
-刪除 Pod (可以一次刪除多個，pod-name 用空格隔開)：
+刪除 Pod ( 可以一次刪除多個，\<pod-name> 用空格隔開 )：
 ```bash
 kubectl delete pod <pod-name> <pod-name> ...
 ```
@@ -263,7 +278,7 @@ kubectl delete pod --force --grace-period=0
 kubectl delete -f <yaml-path>
 ```
 
-> **範例**：刪除用 yaml 建立的 multi-container-pod
+> **範例**：刪除一開始用 yaml 建立的 multi-container-pod
 
 ```bash
 kubectl delete -f multi-container-pod.yaml --force
@@ -285,7 +300,7 @@ kubectl run busybox --image busybox --command -- sleep 300
 kubectl run <pod-name> --image <image> -- <arg1> <arg2> ... <argN>
 ```
 
-(關於 Pod 中的指令與參數，會在之後介紹)
+( 關於 Pod 中的指令與參數，會在之後介紹，有興趣的話可以先參考 [Day 05](https://ithelp.ithome.com.tw/articles/10345967) )
 
 在執行中的 Pod 裡執行指令：
 ```bash
@@ -301,6 +316,10 @@ kubectl exec busybox -- echo hello
 ```bash
 kubectl exec -it <pod-name> -- /bin/sh
 ```
+或是：
+```bash
+kubectl exec -it <pod-name> -- /bin/bash
+```
 > **範例**：使用 sh shell 與剛剛建立的 busybox 互動
 
 ```bash
@@ -312,7 +331,7 @@ kubectl exec -it busybox -- /bin/sh
 ```bash
 kubectl set image pod <pod-name> <container-name>=<new-image>
 ```
-> 例如有一個 Pod 名為 webapp，裡面的容器名稱為 web，要更新 image 為 nginx:1.15：
+> **範例**：假設有一個 Pod 名為 webapp，裡面的容器名稱為 web，要更新 image 為 nginx:1.15：
 
 ```bash
 kubectl set image pod webapp web=nginx:1.15
@@ -340,7 +359,7 @@ kubectl get pod busybox -o jsonpath='{.status.podIP}'
 
 * kubectl describe：以 cluster 的角度來觀察 Pod 與容器的狀態。
 
-* kubectl logs：以 container 的角度書出 Pod 中「容器的 log」
+* kubectl logs：以 container 的角度輸出 Pod 中「容器的 log」，也就是容器的 stdout/stderr。
 
 這樣說可能比較抽象，我們來看幾個例子，順便練習一下有關 Pod 的操作 :
 
@@ -485,15 +504,15 @@ kubectl logs web
 
 ### Multi-Container Pod
 
-前面提到 Pod 中可以有多個容器，而這些容器可以分為兩種常見的應用類型：Init Container 和 Sidecar Container。
+前面提到 Pod 中可以有**多個**容器，而這些容器可以分為兩種常見的應用類型：Init Container 和 Sidecar Container。
 
 ### Init Container
 
-在 Pod 中「最先開始」執行，如果 initContainers 還沒執行完，其餘的 containers 就不會啟動。
+在 Pod 中「最先開始」執行的容器，如果 initContainers 還沒執行完，其餘的 containers 就不會啟動。
 
 > 如果有多個 initContainers，則會按照順序來執行。
 
-常見的應用場景例如在主容器執行前，先進一些初始化的工作，例如下載資料、設定環境變數等。底下來看一個簡單的實作：
+常見的應用場景是在主容器執行前，先進一些初始化的工作，例如下載資料、準備環境等等。底下來看一個簡單的實作：
 
 * 定義一個叫做「init-demo」的 Pod，裡面有兩個 initContainers、一個 main container：
 
