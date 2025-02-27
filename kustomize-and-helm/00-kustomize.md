@@ -2,7 +2,7 @@
 
 ## Kustomize 簡介
 
-一個專案可能由多份 yaml 組成，例如一個網站可能使用
+使用 Kubernetes 部署專案時，該專案可能由多份 yaml 組成，例如一個網站可能使用：
 
 * Deployment 部署
 
@@ -31,14 +31,126 @@
 
 ```bash
 # kubectl 原生支援 kustomize，不須額外安裝
-kubectl apply -k /path/to/kustomization.yml
+# <dir>：kustomization.yml 所在的目錄
+kubectl apply -k <dir> 
 ```
 
 or
 
 ```bash
 # 需要先安裝 kustomize 工具
-kustomize build /path/to/kustomization.yml | kubectl apply -f -
+kustomize build <dir> | kubectl apply -f -
+```
+
+## kustomization.yml 初探：加上 label & 修改 image
+
+**事前準備**
+
+建立 Deployment 和 Service 的 yaml 檔：
+
+```bash
+kubectl create deployment nginx --image=nginx:latest --dry-run=client -o yaml > deployment.yaml
+kubectl create service clusterip nginx --tcp=80:80 --dry-run=client -o yaml > service.yaml
+```
+
+> 可以先自己看一下這兩份 yaml 的內容。
+
+---
+
+這裡是一份簡單的 kustomization.yml：
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources: # 引入樣本 yaml
+- deployment.yaml
+- service.yaml
+
+commonLabels: # 兩個樣本都打上 label
+  demo: basic-kustomize
+
+images: # 覆蓋掉所有樣本的 image
+- name: nginx # 舊 image
+  newName: nginx # 新 image
+  newTag: 1.26.3 # 新 tag
+```
+
+> 這份 kustomization.yml 引入了 deployment.yaml 和 service.yaml 作為樣本，修改內容是：
+
+* 幫兩者加上 `demo: basic-kustomize` 的 label。
+* 把所有叫做 nginx 的 image 都改成 nginx:1.26.3。(如果只是要改 tag，可以不用寫 newName)
+
+---
+
+驗證看看：
+
+```bash
+# 僅輸出修改後的 yaml，不會真的部署
+kubectl kustomize .
+```
+
+```yaml
+piVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+    demo: basic-kustomize # 加上的 label
+  name: nginx
+spec:
+  ports:
+  - name: 80-80
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+    demo: basic-kustomize 
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+    demo: basic-kustomize # 加上的 label
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+      demo: basic-kustomize
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+        demo: basic-kustomize
+    spec:
+      containers:
+      - image: nginx:1.26.3 # 修改的 image
+        name: nginx
+        resources: {}
+status: {}
+```
+
+確認無誤後，就可以部署了：
+
+```bash
+kubectl apply -k .
+```
+
+刪除剛剛部署的所有資源：
+
+```bash
+kubectl delete -k .
 ```
 
 ## Kustomize 的專案結構
@@ -68,12 +180,12 @@ kustomize build /path/to/kustomization.yml | kubectl apply -f -
 
 我們來看一個專案的結構範例：
 
-> 專案名稱為「my-web」，其中會用到 mongodb 和我們自己開發的 web：
+> 專案名稱為「my-web」，其中會用到 redis 和我們自己開發的 web：
 
 ```plaintext
 my-web/
 │
-├── mongo/
+├── redis/
 │   ├── base/
 │       ├── statefulset.yaml  <-- 樣板yaml
 │       └── kustomization.yaml <-- statefulset.yaml + 通用設定
@@ -99,12 +211,13 @@ my-web/
 當我們想要針對 dev 環境作部署時，overlays/dev/kustomization.yaml 應該要：
 
 1. 引入：
-  * ../mongo/base/kustomization.yaml  <-- statefulset.yaml + 通用設定
+  * ../redis/base/kustomization.yaml  <-- statefulset.yaml + 通用設定
   * ../myapp/base/kustomization.yaml  <-- deployment.yaml & service.yaml + 通用設定
   * deployment-patch.yaml             <-- dev 補丁
   * statefulset-patch.yaml            <-- dev 補丁
 
 2. 加入針對 dev 環境的設定              <-- dev 設定        
+
 
 若執行 `kubectl apply -k overlays/dev/kustomization.yaml`，最終會被部署的 yaml 為：
 
@@ -112,172 +225,8 @@ my-web/
 * deployment.yaml：通用設定 + dev 補丁 + dev 設定
 * service.yaml：通用設定 + dev 設定
 
-> kustomization.yaml 是可以互相引用的，若設定有重疊，來源端的設定會被覆蓋。
+> kustomization.yaml 是可以互相引用的，若設定有重疊，來源端的設定會被覆蓋。(通常是 overlay 去引用 base 的 kustomization，所以有重疊的部分以 overlay 為主)
 
+## 小結
 
-
-
-
-
-
-
-
-![alt text](image.png)
-
-
-## Try it out
-
-The project structure is as follows:
-
-```plaintext
-kustomize-demo
-├── base
-│   ├── backend
-│   │   ├── base-back.yml
-│   │   ├── kustomization.yml --> resources: base-back.yml
-│   └── frontend
-│       ├── base-front.yml
-│       └── kustomization.yml --> resources: base-front.yml
-└── overlays
-    ├── dev
-    │   └── kustomization.yml
-    └── prod
-        └── kustomization.yml
-```
-
-Our goal：
-
-```plaintext
-prod-env：
-    namespace: prod
-    frontend-deployment：4 replicas, image: nginx:latest, name: prod-front
-    backend-deployment：4 replicas, image: redis, name: prod-back
-
-dev-env：
-    namespace: dev
-    frontend-deployment：1 replicas, image: nginx:1.26.3, name: dev-front
-    backend-deployment：1 replicas, image: redis, name: dev-back
-```
-
-* create a new directory
-
-```bash
-mkdir -p kustomize-demo
-cd kustomize-demo
-```
-
-* create the basic kustomize structure
-```bash
-mkdir -p base/frontend && mkdir -p base/backend
-mkdir -p overlays/prod && mkdir -p overlays/dev
-```
-> base: contains the base resources, here we have two different applications and two different environments
-
-> overlays: contains the overlays yaml files
-
-
-
-* create a deployment and a service yaml as base resources
-
-```bash
-kubectl create deployment frontend --image=nginx --dry-run=client -o yaml > base/frontend/base-front.yml
-kubectl create deployment backend --image=redis --dry-run=client -o yaml > base/backend/base-back.yml
-```
-
-* create a kustomization file for each application
-
-```bash
-vim base/frontend/kustomization.yml
-```
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources: # here you can add template yaml or other kustomization files
-- base-front.yml # template yaml must be in the same directory with kustomization file
-# if you have other kustomization files, you can add them here(relative path)
-```
-
-```bash
-cp base/frontend/kustomization.yml base/backend/kustomization.yml
-sed -i 's/base-front.yml/base-back.yml/g' base/backend/kustomization.yml
-```
-
-* create the overlays for prod environment：
-
-```bash
-vim overlays/prod/kustomization.yml
-```
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: prod
-
-resources: # include other kustomization files(relative path)
-- ../../base/frontend
-- ../../base/backend
-
-replicas: 
-- name: frontend
-  count: 4
-- name: backend
-  count: 4
-
-images:
-- name: nginx
-  newName: nginx # if you want to use other image, you can change it here
-  newTag: latest # change the image tag here
-```
-
-* create the overlays for dev environment：
-
-```bash
-vim overlays/dev/kustomization.yml
-```
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: dev
-
-resources:
-- ../../base/frontend
-- ../../base/backend
-
-replicas:
-- name: frontend
-  count: 1
-- name: backend
-  count: 1
-
-images:
-- name: nginx
-  newName: nginx
-  newTag: 1.26.3
-```
-
-* test the kustomize for both environments：
-```bash
-kustomize build overlays/prod
-kustomize build overlays/dev
-```
-
-* if everything is correct, you can apply the resources to the cluster
-```bash
-kubectl create ns prod
-kubectl create ns dev
-kustomize build overlays/prod | kubectl apply -f -
-kustomize build overlays/dev | kubectl apply -f -
-```
-
-https://weii.dev/kustomize/
-
-## to do
-
-https://ithelp.ithome.com.tw/articles/10355999
-
-helm with kustomize & argocd
+先介紹
