@@ -1,6 +1,16 @@
 # Kustomize
 
-## Kustomize 簡介
+## 目錄
+
+* [Kustomize 簡介](#kustomize-簡介)
+
+* [如何部署 kustomize 後的 yaml](#如何部署-kustomize-後的-yaml)
+
+* [kustomization.yml 初探：加上 label & 修改 image](#kustomizationyml-初探加上-label--修改-image)
+
+* [小結](#小結)
+
+### Kustomize 簡介
 
 使用 Kubernetes 部署專案時，該專案可能由多份 yaml 組成，例如一個網站可能使用：
 
@@ -27,7 +37,9 @@
 
 之後要部署專案時，我們只需針對不同環境修改 `kustomization.yml` 即可，而不用去改所有 yaml。
 
-設定好 kustomization.yml 後，使用以下指令即可部署訂製後的 yaml：
+### 如何部署 kustomize 後的 yaml
+
+設定好 kustomization.yml 後，使用以下指令即可部署客製後的 yaml：
 
 ```bash
 # kubectl 原生支援 kustomize，不須額外安裝
@@ -42,7 +54,13 @@ or
 kustomize build <dir> | kubectl apply -f -
 ```
 
-## kustomization.yml 初探：加上 label & 修改 image
+> 安裝 kustomize：
+
+```bash
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+```
+
+### kustomization.yml 初探：加上 label & 修改 image
 
 **事前準備**
 
@@ -153,80 +171,86 @@ kubectl apply -k .
 kubectl delete -k .
 ```
 
-## Kustomize 的專案結構
+### Patch
 
-一個使用 kustomize 管理的專案目錄，建議使用以下結構：
+雖然能直接用關鍵字來修改 yaml，但有些情況下我們並非只是單純的「取代」某個值，可能需要「新增」、「刪除」某個欄位，或是一次變更多個欄位。這時就需要用到 **Patch**。
 
-* **base 目錄**：
+Patch 的方式有兩種：
 
-  * resources：放置「樣版 yaml」，是每個環境都會用到的資源。
+2. JSON6902 Patch：遵循 [RFC6902](https://tools.ietf.org/html/rfc6902) 的格式，對 yaml 進行修改。
 
-  * kustomization.yml：引入需要的`樣板 yaml` + 加入`通用設定`。
+2. Strategic Merge Patch：直接採用 Kubernetes 的 yaml 寫法，說明該如何修改。
 
-* **overlays 目錄**：
-  
-  * 環境子目錄：不同的部署環境以「子目錄」區分，例如 overlays/dev、overlays/prod。
+我們來看一個簡單的範例：修改 Pod 的 labels。
 
-    * other resources：放置「某些環境才會用到」的 resources yaml，例如只有 prod 環境需要額外的 Ingress 設定，則就會有一個 overlays/prod/ingress.yml。
+原始 yaml：
 
-    * patches：放置各種的「補丁 yaml」，針對 base 目錄下的樣本 yaml 做修改。
-
-    * kustomization.yml：引入 `base 目錄下的 kustomization.yml` + 套用 `patches` + 加入`針對性設定` + 引入 `other resources` 
-  
-  > patches v.s 針對性設定：pathces 是額外的 yaml 檔被引入到 kustomization.yml，而「針對性設定」是**直接寫**在 kustomization.yml 中。由於某些設定並不支援在 kustomization.yml 中直接寫，因此需要透過 patches 來修改。
-
-  > 舉例而言，memory limit & request 就需要用 patches 來修改，而 image 則可以直接在 kustomization.yml 中指定。
-
-
-我們來看一個專案的結構範例：
-
-> 專案名稱為「my-web」，其中會用到 redis 和我們自己開發的 web：
-
-```plaintext
-my-web/
-│
-├── redis/
-│   ├── base/
-│       ├── statefulset.yaml  <-- 樣板yaml
-│       └── kustomization.yaml <-- statefulset.yaml + 通用設定
-│
-├── myapp/
-|   ├── base/
-|       ├── deployment.yaml  <-- 樣板yaml
-|       ├── kustomization.yaml  <-- deployment.yaml & service.yaml + 通用設定
-|       └── service.yaml  <-- 樣板yaml
-|  
-├── overlays/
-    ├── dev/
-    │   ├── deployment-patch.yaml <-- 補丁yaml
-    │   ├── statefulset-patch.yaml <-- 補丁yaml
-    │   └── kustomization.yaml 
-    │
-    └── prod/
-        ├── deployment-patch.yaml
-        ├── statefulset-patch.yaml
-        └── kustomization.yaml
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    name: nginx
 ```
 
-當我們想要針對 dev 環境作部署時，overlays/dev/kustomization.yaml 應該要：
+* Patch：將 lables 改成 `env: prod`：
 
-1. 引入：
-  * ../redis/base/kustomization.yaml  <-- statefulset.yaml + 通用設定
-  * ../myapp/base/kustomization.yaml  <-- deployment.yaml & service.yaml + 通用設定
-  * deployment-patch.yaml             <-- dev 補丁
-  * statefulset-patch.yaml            <-- dev 補丁
+**JSON6902 Patch**：
 
-2. 加入針對 dev 環境的設定              <-- dev 設定        
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
+resources:
+- pod.yaml
 
-若執行 `kubectl apply -k overlays/dev/kustomization.yaml`，最終會被部署的 yaml 為：
+patches: 
+- target:
+    kind: Pod
+    name: nginx
+  patch: |-
+    - op: replace
+      path: /metadata/labels
+      value:
+        env: prod
+```
 
-* statefulset.yaml：通用設定 + dev 補丁 + dev 設定
-* deployment.yaml：通用設定 + dev 補丁 + dev 設定
-* service.yaml：通用設定 + dev 設定
+* op：要進行的操作，這裡是 `replace`，也可以是 `add`、`remove`。
 
-> kustomization.yaml 是可以互相引用的，若設定有重疊，來源端的設定會被覆蓋。(通常是 overlay 去引用 base 的 kustomization，所以有重疊的部分以 overlay 為主)
+* path：要修改的路徑。
+
+* value：新的值。
+
+**Strategic Merge Patch**：
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+patches: 
+- patch: |-
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: nginx
+      $patch: replace 
+      labels:
+        env: prod
+```
+
+    
+
 
 ## 小結
 
-先介紹
+本篇介紹了為何需要 Kustomize，以及了解了最基本的 kustomization.yml 設定。[下一篇](01-kus-syntax.md)將會列出許多常用的場景該如何使用 Kustomize 來管理 yaml。
+
+
