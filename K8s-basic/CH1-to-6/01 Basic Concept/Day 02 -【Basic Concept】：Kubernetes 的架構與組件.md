@@ -65,43 +65,43 @@ Node 提供了執行環境給 Pod，而一個 Node 的必要組件如下：
 
 2. **Container Runtime**
 
-   > Kubernetes 透過 CRI 與 Container Runtime 溝通，讓 Container Runtime 執行 Pod 中的容器。其中的歷史故事其實還蠻有趣的：
+   Kubernetes 透過 Container Runtime Interface 與 Container Runtime 溝通，讓 Container Runtime 執行 Pod 中的容器。其中的歷史故事其實還蠻有趣的：
 
-   2013 年，Docker 出現帶起了一陣容器化的風潮，而也帶來了容器管理的需求，因此 Kubernetes 1.0 也在 2015 應運而生。
+   * 2013 年，Docker 出現帶起了一陣容器化的風潮，而也帶來了容器管理的需求，因此 Kubernetes 1.0 也在 2015 應運而生。
 
-   作為一個「編排系統」，底層「執行容器」的工作並非由 K8s 自己完成，而是依賴 Container Runtime 處理，而當時最火紅的 Docker 就是不二人選。
+   * 作為一個「編排系統」，底層「執行容器」的工作並非由 K8s 自己完成，而是依賴 Container Runtime 處理，而當時最火紅的 Docker 就是不二人選。
 
-   > Docker 本身**並非** Container Runtime，而是「包含」 Container Runtime 的容器管理工具。
+     > Docker 本身**並非** Container Runtime，而是「包含」 Container Runtime 的容器管理工具。
 
-   但隨著容器技術的發展與多元化，K8s 識到不能被單一的 Docker 綁住，因此於 2016 年推出了自己的 Container Runtime Interface (CRI) 標準，做為與底層 Container Runtime 互動的橋梁。
+   * 但隨著容器技術的發展與多元化，K8s 識到不能被單一的 Docker 綁住，因此於 2016 年推出了自己的 Container Runtime Interface (CRI) 標準，做為與底層 Container Runtime 互動的橋梁。
    
-   > 只要你的 Container Runtime 符合 CRI 標準，就能被 K8s 調用。
+     > 只要你的 Container Runtime 符合 CRI 標準，就能被 K8s 調用。
 
-   尷尬的是，由於 Docker 比較早出生，因此並不符合 CRI 標準，因此 K8s 只能先推出一個叫做「Docker shim」的墊片，充當「翻譯員」，讓 K8s 還是能用 CRI 的規範與 Docker 合作：
+   * 尷尬的是，由於 Docker 比較早出生，因此並不符合 CRI 標準，因此 K8s 只能先推出一個叫做「Docker shim」的墊片，充當「翻譯員」，讓 K8s 還是能用 CRI 的規範與 Docker 合作：
     
-   ```plaintext
-   k8s -> <CRI> -> Docker shim -> Docker -> Container Runtime
-   ```
+     ```plaintext
+     k8s -> <CRI> -> Docker shim -> Docker -> Container Runtime
+     ```
 
-   > Docker 本身一堆功能，但其實 K8s 只需要 Docker 的 Container Runtime 而已，再加上 Docker shim 這個「翻譯員」，資源的消耗就變得更多了。
+     > Docker 本身一堆功能，但其實 K8s 只需要 Docker 的 Container Runtime 而已，再加上 Docker shim 這個「翻譯員」，資源的消耗就變得更多了。
 
-   2017 年，Docker 將自家核心的 Container Runtime --- **containerd** 捐給了 CNCF。同為 CNCF 專案的 K8s ，與 containerd 的關係就像是「同門師兄弟」。
+   * 2017 年，Docker 將自家核心的 Container Runtime --- **containerd** 捐給了 CNCF。同為 CNCF 專案的 K8s ，與 containerd 的關係就像是「同門師兄弟」。
 
-   containerd 身為「師弟」，當然得遵從「師兄」的 CRI 標準，因此 Docker shim 與 Docker 被棄用，改為了 CRI-containerd 與 containerd 的組合：
+   * containerd 身為「師弟」，當然得遵從「師兄」的 CRI 標準，因此 Docker shim 與 Docker 被棄用，改為了 CRI-containerd 與 containerd 的組合：
    
-   ```plaintext
-   k8s -> <CRI> -> CRI-containerd -> containerd -> Container Runtime
-   ```
+     ```plaintext
+     k8s -> <CRI> -> CRI-containerd -> containerd -> Container Runtime
+     ```
 
-   雖然成功擺脫了 Docker，但還是有 CRI-containerd 這個 daemon 要跑，資源的消耗還有優化空間。因此後來將 CRI-containerd 的功能直接做成 plugin 整合進 containerd 裡，自此 K8s 就可以直接與 containerd 溝通了：
+   * 雖然成功擺脫了 Docker，但還是有 CRI-containerd 這個 daemon 要跑，資源的消耗還有優化空間。因此後來將 CRI-containerd 的功能直接做成 plugin 整合進 containerd 裡，自此 K8s 就可以直接與 containerd 溝通了：
 
-   ```plaintext
-   K8s -> <CRI> -> containerd
-   ```
+     ```plaintext
+     K8s -> <CRI> -> containerd
+     ```
    
-   到了這一步，終於實現了當初的目標：K8s 不被 Docker 綁死，只要你的 Container Runtime 符合 CRI 標準，就能被 K8s 調用。
+   * 到了這一步，終於實現了當初的目標：K8s 不被 Docker 綁死，只要你的 Container Runtime 符合 CRI 標準，就能被 K8s 調用。
    
-   > 目前最主流的 Container Runtime 有 **containerd**、**CRI-O**等等。
+     > 目前最主流的 Container Runtime 有 **containerd**、**CRI-O**等等。
 
 3. **Kube-porxy**
 
