@@ -40,12 +40,12 @@ kubeadm 是一個專門用來部署 Kubernetes 的工具，能夠快速的建立
 使用 kubeadm 進行建置 cluster 的步驟如下：
 
   1. 準備環境(虛擬機)
-  2. 安裝 container runtime
+  2. 安裝 Container Runtime
   3. 安裝必要組件：kubelet、kubeadm、kubectl
   4. 關閉 swap 並啟用 ip_forward
   5. 初始化 master node
   6. 加入 worker node
-  7. 安裝 Pod network
+  7. 安裝 CNI plugin
 
 ### STEP 1：準備環境
 
@@ -240,7 +240,9 @@ containerd config dump | grep SystemdCgroup
 在每台 VM 上，需要以下三個組件：
 
   * **kubelet**：昨天的文章中有提到，它是「小船的船長」。
-  * **kubeadm**：用來部署 cluster 的工具。
+
+  * **kubeadm**：用來部署 cluster 的工具。除了 kubelet 我們要自己裝以外，昨天提到的其他組件都會由 kubeadm 來幫我們安裝。
+
   * **kubectl**：管理員用來與 cluster 進行溝通的 CLI 工具，讓我們能透過下指令來操作 cluster。
 
 安裝以上三個組件的方式如下：
@@ -414,9 +416,9 @@ kubectl get nodes
 
 雖然所有 Node 都已成功加入 cluster，但由於缺少 Pod network，所以 Node 的狀態會是 NotReady。
 
-### STEP 7：安裝Pod network
+### STEP 7：安裝 CNI plugin
 
-為了讓 cluster 中的 Pod 可以彼此溝通，我們需要安裝 **CNI** (Container Network Interface) 來部署 Pod network，可參考[官方文件](https://kubernetes.io/docs/concepts/cluster-administration/networking/#how-to-implement-the-kubernetes-network-model)選則 CNI。
+昨天有提到，為了讓 cluster 中的 Pod 可以彼此溝通，需安裝 **CNI** (Container Network Interface) 來部署 Pod network，可參考[官方文件](https://kubernetes.io/docs/concepts/cluster-administration/networking/#how-to-implement-the-kubernetes-network-model)選則 CNI。
 
 常見的 CNI 例如 flannel、calico 等。這裡兩種安裝方式都會介紹：
 

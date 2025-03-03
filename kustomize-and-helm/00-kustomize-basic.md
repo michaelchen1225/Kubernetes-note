@@ -186,6 +186,7 @@ Patch 的方式有兩種：
 原始 yaml：
 
 ```yaml
+# pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -241,16 +242,75 @@ patches:
     kind: Pod
     metadata:
       name: nginx
-      $patch: replace 
       labels:
+        $patch: replace 
         env: prod
 ```
 
-    
+> JSON6902 Patch 與 Strategic Merge Patch 的差異在於**寫法**，功能上是一樣的。筆者個人比較偏好 Strategic Merge Patch，因為寫法比較直覺(K8s yaml 的格式)。
+
+上面直接將 patch 寫在 kustomization.yml 中的方式，稱為 **Inline Patch**，但當 patch 較多時會變得雜亂，因此可以將 patch 寫在另外的 yaml 檔案中再引入：
+
+**JSON6902 Patch**：
+
+```yaml
+# pod-patch.yaml
+- op: replace
+  path: /metadata/labels
+  value:
+    env: prod
+```
+
+```yaml
+# kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+patches: 
+- target:
+    kind: Pod
+    name: nginx
+  path: pod-patch.yaml
+```
+
+
+
+**Strategic Merge Patch**：
+```yaml
+# pod-patch.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    $patch: replace
+    env: prod
+```
+
+```yaml
+# kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+patches: 
+- target:
+    kind: Pod
+    name: nginx
+  path: pod-patch.yaml
+```
+
+測試之後可以發現與 Inline Patch 的結果是一樣的。
 
 
 ## 小結
 
-本篇介紹了為何需要 Kustomize，以及了解了最基本的 kustomization.yml 設定。[下一篇](01-kus-syntax.md)將會列出許多常用的場景該如何使用 Kustomize 來管理 yaml。
+本篇介紹了為何需要 Kustomize，以及了解了最基本的 kustomization.yml 設定。[下一篇](01-kus-syntax.md)將會列出許多常用的場景。
 
 
