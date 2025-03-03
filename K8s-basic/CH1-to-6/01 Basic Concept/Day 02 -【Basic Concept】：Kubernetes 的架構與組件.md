@@ -65,7 +65,7 @@ Node 提供了執行環境給 Pod，而一個 Node 的必要組件如下：
 
 2. **Container Runtime**
 
-   Kubernetes 透過 Container Runtime Interface 與 Container Runtime 溝通，讓 Container Runtime 執行 Pod 中的容器。其中的歷史故事其實還蠻有趣的：
+   Kubernetes 透過 Container Runtime Interface 與 Container Runtime 溝通，讓 Container Runtime 執行 Pod 中的容器。這裡的歷史故事其實還蠻有趣的：
 
    * 2013 年，Docker 出現帶起了一陣容器化的風潮，而也帶來了容器管理的需求，因此 Kubernetes 1.0 也在 2015 應運而生。
 
@@ -111,7 +111,7 @@ Node 提供了執行環境給 Pod，而一個 Node 的必要組件如下：
    
    kube-porxy 會監控 Service 與 Pod 的變化，並將 Service 的流量正確的轉發到 Pod。
 
-而因為 Node 的角色不同，又可分為以下兩種：
+以上為每個 Node 都必須安裝的組件。而因為 Node 的角色不同，又可分為以下兩種：
 
 * **Master Node** 
 
