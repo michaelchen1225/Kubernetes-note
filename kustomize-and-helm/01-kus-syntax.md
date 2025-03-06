@@ -1,10 +1,32 @@
 # Kustomization 語法彙整
 
+## 目錄
+
+* [名詞解釋](#名詞解釋)
+
+* [環境準備](#環境準備)
+
+* [Transformer：通用設定](#Transformer)
+  * [commonLabels](#commonlabels統一新增-label)
+  * [commonAnnotations](#commonannotations統一新增-annotation)
+  * [namespace](#namespace統一指定-namespace)
+  * [namePrefix](#nameprefix統一新增-prefix)
+  * [nameSuffix](#nameSuffix統一新增-Suffix)
+  * [image](#image統一修改-Image)
+  * [Custom Transformer --- Configuration](#custom-transformer-----configuration)
+
+* [Patch：以 Strategic Merge Patch 為例](#patch以-strategic-merge-patch-為例)
+  * [Patch 的基本觀念](#patch-的基本觀念)
+  * [merge --- 移除整個 Map](#merge-----移除整個-map)
+  * [merge --- 移除特定 key value](#merge-----移除特定-key-value)
+  * [merge --- 修改 value](#merge-----修改-value)
+  * [merge --- 新增](#merge-----新增)
+  * [replace --- 重新改寫](#replace-----重新改寫)
+  * [一次 Patch 多個 Resource](#一次-patch-多個-resource)
+
 ## 名詞解釋
 
-* Transformer：為**全部**的樣本 yaml 套用某種變更。kustomize 有內建許多的 Transformer 可以使用，例如 commonLabels、commonAnnotations、namespace、namePrefix、nameSuffix、image 等等。
-
-  * configuration：額外寫一個 yaml，指定 Transformer 更改的路徑。(底下會有範例)
+* Transformer：為**全部**的樣本 yaml 套用某種通用變更。kustomize 有內建許多的 Transformer 可以使用，例如 commonLabels、commonAnnotations、namespace、namePrefix、nameSuffix、image 等等。
 
 * patches：使用 **JSON6902 Patch** 或 **Strategic Merge Patch** 來修改**特定**的樣本 yaml。設定方式可分兩種：
   1. Inline：直接寫在 kustomization.yml 中。
@@ -16,10 +38,10 @@
 
 ## 環境準備
 
-測試時會使用的樣本 yaml 已經寫好了，clone 下來之後僅需修改 kustomization.yml 即可。
+下載測試所需的 Resource yaml (不含 kustomization.yml)：
 
 ```bash
-git clone 
+git clone https://github.com/michaelchen1225/kustomize-simple-demo.git
 ```
 
 ## Transformer
@@ -230,9 +252,9 @@ kubectl kustomize .
 
 ### merge --- 移除整個 Map  
 
-**目的**：把 deploy.yaml 的 metadata.labels 移除。
+**範例**：把 deploy.yaml 的 metadata.labels 移除。
 
-* 在寫 patch 時有個訣竅：只要留下 target 資訊(apiVersion、kind、metadata.name)和要修改的欄位即可，其他通通不用寫(因為沒有指定的欄位會保留原狀)。
+* 在寫 patch 時有個訣竅：只要留下 target 資訊(apiVersion、kind、metadata.name)和要修改的欄位即可，其他通通不用寫(沒有指定的欄位會保留原狀)。
 
 ```yaml
 # deploy-patch.yaml
@@ -255,9 +277,12 @@ patches:
 - path: deploy-patch.yaml
 ```
 
+> 測試：kubectl kustomize .
+
+
 ### merge --- 移除特定 key value
 
-* 把 deploy.yaml 的 app: deploy 移除。
+**範例**：把 deploy.yaml 的 `app: deploy` 移除。
 
 ```yaml
 # deploy-patch.yaml
@@ -269,7 +294,7 @@ metadata:
   name: deploy
 ```
 
-kustomization.yml 同上
+> kustomization.yml 同上
 
 ### merge --- 修改 value
 
@@ -291,9 +316,115 @@ spec:
       - image: my-new-web
         name: my-web
 ```
+> kustomization.yml 同上
 
-### replace
+### merge --- 新增
 
-### 混合使用
+**範例**：給 deploy.yaml 添加新 label，並新增一個 container
+
+```yaml
+# deploy-patch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    new: label  # 新 label
+  name: deploy
+spec:
+  template:
+    spec:
+      containers: # 新 container
+      - image: new-container
+        name: new-container
+```
+
+> kustomization.yml 同上
+
+### replace --- 重新改寫
+
+replace 適合用在要「整段 Map/list 重寫」的情況。replace 與 merge 的差別在於，patch 中沒提到的地方會被直接移除，而非保留原狀。
+
+**範例**：重寫 deploy.yaml 的 label 和 template，只留下 `new: label` 與 `new-container`。
+
+```yaml
+# deploy-patch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  $patch: replace
+  labels:
+    new: label  # 新 label
+  name: deploy
+spec:
+  template:
+    spec:
+      $patch: replace
+      containers: # 新 container
+      - image: new-container
+        name: new-container
+```   
+
+> kustomization.yml 同上
+
+這是一個混合 merge 和 replace 的例子，可以看到：
+
+* `$patch: replace` 寫在 labes 和 containers 之上，表示整個 labels 和 containers 都會被重新改寫。
+* 沒有標示 `$patch: replace` 的地方使用預設的 merge，因此保留原狀。
+
 
 ### 一次 Patch 多個 Resource
+
+> Offical Doc：(https://github.com/kubernetes-sigs/kustomize/blob/master/examples/patchMultipleObjects.md)
+
+透過在 target 的設定，我們能讓一個 patch.yaml 套用在多個 Resource 上。target 的設定格式如下：
+
+```yaml
+  patches:
+  - path: <relative path to file containing patch>
+    target:
+      group: <optional group>
+      version: <optional version>
+      kind: <optional kind>
+      name: <optional name or regex pattern> # 支援 regex，例如 name: foo*
+      namespace: <optional namespace>
+      labelSelector: <optional label selector>
+      annotationSelector: <optional annotation selector>
+```
+
+**將 deploy.yaml** 與 **deploy-2.yaml** 都打上 `new: label`，並且加入一個 sidecar container。
+
+```yaml
+# deploy-patch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    new: label 
+  name: the-name-is-not-important
+spec:
+  template:
+    spec:
+      containers:
+      - image: sidecar
+        name: sidecar
+```
+> 由於 patch 的目標會在 kustomization.yml 中用 `target` 指定，所以 patch.yaml 中的 name 可以隨便寫。
+
+```yaml
+# kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deploy.yaml
+- deploy-2.yaml
+
+patches:
+- path: deploy-patch.yaml
+  target:
+    kind: Deployment
+```
+
+## 小結
+
+今天介紹的基本語法，足以應付一般的需求。不過今天的環境其實很單純，只有一個目錄。下一篇會介紹一個專案是如何用 kustomize 管理的。 
