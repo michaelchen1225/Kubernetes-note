@@ -194,7 +194,7 @@ Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administr
 目前 CNCF 比較重要的 K8s 相關認證有以下三張：
 
 * CKA
-* CKAD：
+* CKAD
 * CKS
 
 > CKA 主要針對 Kubernetes 的操作與管理能力進行考核，較偏向「管理」，CKAD 則偏向「開發」，而 CKS 偏向「資安」。
