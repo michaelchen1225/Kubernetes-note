@@ -1,6 +1,20 @@
 ## Kustomize 的專案結構
 
-## Kustomization.yml 的引用
+## 目錄
+
+* [Kustomization.yml 的基本引用](#kustomizationyml-的基本引用)
+
+* [Overlay 與 Base](#overlay-與-base)
+
+* [Kustomize 常見的專案結構](#kustomize-常見的專案結構)
+
+* [Component](#component)
+  * [Component 與 Overlay 的關係：先合併後渲染](#component-與-overlay-的關係先合併後渲染)
+  * [Component --- patch 模組化](#component-----patch-模組化)
+
+* [總結](#總結)
+
+## Kustomization.yml 的基本引用
 
 在[上一篇](https://github.com/michaelchen1225/Kubernetes-note/blob/master/kustomize-and-helm/01-kus-syntax.md#%E7%92%B0%E5%A2%83%E6%BA%96%E5%82%99)的語法介紹中，我們只撰寫一份 kustomization.yml，但其實一個專案中可以有多個 kustomization.yml，並相互引用。
 
