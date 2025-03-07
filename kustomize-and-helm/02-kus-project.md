@@ -232,6 +232,20 @@ my-web/
     └── prod
 ```
 
+componet 的 kubeomization.yml：
+
+```yaml
+# components/ingress/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1alpha1 # 注意這裡是 v1alpha1
+kind: Component 
+
+resources:
+- ingress.yaml
+
+<其他設定>
+```
+> 除了 apiVersion 須注意版本、kind 改成 Component 之外，其他設定與 kustomization.yml 一樣。
+
 這時後 test、staging、prod 的 kustomization.yml 就可以這樣設定：
 
 ```yaml
@@ -240,6 +254,8 @@ kind: Kustomization
 
 resources:
 - ../base
+
+components:
 - ../../components/ingress # 引用 Component
 
 <其他設定>
