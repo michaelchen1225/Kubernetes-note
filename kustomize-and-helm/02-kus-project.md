@@ -68,11 +68,7 @@ commonLabels:
 kubectl kustomize prod
 ```
 
-觀察輸出結果，可以發現：
-
-* 在 prod/kustomization.yml 中，引用了 dev 目錄下的 kustomization.yml，所以加上 `env:dev` 的 pod.yaml 和 svc.yaml 被引用進來。
-
-* 有 `env: dev` 的 pod.yaml 和 svc.yaml 被進行二次渲染，被指定到 `namespace: prod`，並加上 `env: prod` 的 Label(覆蓋掉原本的 `env: dev`)。
+觀察輸出結果，可以發現：在 prod/kustomization.yml 中，引用了 dev 目錄下的 kustomization.yml，這會對 pod.yaml 和 svc.yaml 進行二次渲染 --> 被指定到 `namespace: prod`，並加上 `env: prod` 的 Label(覆蓋掉首次選染的 `env: dev`)。
 
 如果我們使用 `kubectl apply -k prod`，最終會部署的 yaml 會包括了經過二次渲染的 pod.yaml 和 svc.yaml，以及 prod 自己的 prod-config.yaml。
 
@@ -263,6 +259,216 @@ components:
 
 這樣一來，就成功的將 ingress 的相關設定「模組化」，讓不同的 overlays 根據自身需求引用 Component。總之，未來出現「只套用在部分環境」的 yaml 時，在 components 目錄下建立所屬的子目錄並加上 kustomization.yml 即可。
 
+
+### Component 與 Overlay 的關係：先合併後渲染
+
+* base 與 components 都會被 overlays 引用，但引用時的效果不同：
+  * base + overlay：base 中的設定並不會引響到 overlay，base 與 overlay 是「先後渲染」的關係。
+  * components + overlay：overlay 會先引用 components 的設定再進行渲染，components 與 overlay 是「先合併後選染」的關係。
+
+很抽象對吧？直接看一個例子：
+
+* 建立三個目錄 --- base、components、overlays：
+
+```bash
+mkdir -p /tmp/base
+mkdir -p /tmp/components
+mkdir -p /tmp/overlays
+```
+
+* 在 base 目錄下建立一個 pod.yaml：
+
+```bash
+cat <<EOF > /tmp/base/pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: base-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+EOF
+```
+
+* 設定 base 的 kustomization.yml：
+
+```bash
+cat <<EOF > /tmp/base/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+commonLabels:
+  base: this-is-base
+EOF
+```
+
+* 在 components 建立一個 pod.yaml：
+
+```bash
+cat <<EOF > /tmp/components/pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: component-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+EOF
+```
+
+* 設定 components 的 kustomization.yml：
+
+```bash
+cat <<EOF > /tmp/components/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+- pod.yaml
+
+commonLabels:
+  component: this-is-component
+EOF
+```
+
+* 在 overlays 建立一個 pod.yaml：
+
+```bash
+cat <<EOF > /tmp/overlays/pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: overlay-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+EOF
+```
+
+* 設定 overlays 的 kustomization.yml，引用 base 與 components：
+
+```bash
+cat <<EOF > /tmp/overlays/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../base
+- pod.yaml
+
+components:
+- ../components
+
+commonLabels:
+  overlay: this-is-overlay
+EOF
+```
+
+* 測試：
+
+```bash
+kubectl kustomize /tmp/overlays
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    base: this-is-base
+    component: this-is-component  
+    overlay: this-is-overlay
+  name: base-pod
+spec:
+  containers:
+  - image: nginx
+    name: my-container
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: this-is-component
+    overlay: this-is-overlay
+  name: component-pod
+spec:
+  containers:
+  - image: nginx
+    name: my-container
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: this-is-component
+    overlay: this-is-overlay
+  name: overlay-pod
+spec:
+  containers:
+  - image: nginx
+    name: my-container
+```
+
+從輸出結果可以看到：
+
+* 由於 components 與 overlays 是「先合併後選染」的關係，**overlays 會先將 components 的設定與自己的合併**，再對所有 resource 進行渲染，因此**所有** Pod 都會被貼上 `component: this-is-component` & `overlay: this-is-overlay`  的 Label。
+
+* 由於 base 與 overlays 是「先後渲染」的關係，於是 base 「**先**」對 base-pod 打上 `base: this-is-base` 的 Label，後續 base-pod 被引用到 overlays 時，又因為 components 與 overlays 的「合併」效果，因此額外被貼上 `component: this-is-component` & `overlay: this-is-overlay` 的 Label。
+
+
+### Component --- patch 模組化
+
+除了能將 Resource 模組化之外，我們也可將 patch 模組化。
+
+什麼意思呢？當有一種 patch 會被重複在不同 overlays 使用時，基於 components 與 overlay 的「合併關係」，就可以先將 patch 寫在 components 中，經由引用將 patch 合併到 overlays，進而對 overlays 的全部資源進行 patch。
+
+舉例來說，只有 test、staging、prod 會將 Deployment 的 replicas 設定為 3，這時就可以將這個 patch 模組化：
+
+* 在 components 目錄下建立一個 patch 子目錄，並撰寫 kustomization.yml & patch.yaml：
+
+```yaml
+# components/replicas-patch/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+- path: replicas-patch.yaml
+  target:
+    kind: Deployment
+```
+
+```yaml
+# components/replicas-patch/replicas-patch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: not-important
+spec:
+  replicas: 3
+```
+
+* 在 test、staging、prod 的 kustomization.yml 引用這個 Component：
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../base
+
+components:
+- ../../components/replicas-patch
+```
+
+這樣一來，replicas-patch 就可以被重複利用，並且只要更新一次 replicas-patch.yaml，所有引用到的 overlays 都會自動更新。
+
+
 ## 總結
 
 * kustomization.yml 可以互相引用，進行多次的渲染，產生最終的 yaml。
@@ -272,4 +478,7 @@ components:
   * components：將設定模組化，供不同的環境引用
   * overlays：針對不同的環境進行設定
 
-* 核心概念：當某目錄下的 yaml 想要在多處被重複利用，直接建立 kustomization.yml 全部引用、設定即可！
+* Base 與 Overlay 的關係是「先後渲染」，Component 與 Overlay 的關係是「先合併後渲染」。
+
+  * 基於「先合併後渲染」的關係，可以將 Resource 與 Patch 模組化，並重複利用。
+
