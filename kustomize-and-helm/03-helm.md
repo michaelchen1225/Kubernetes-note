@@ -1,4 +1,4 @@
-# H
+# Helm
 
 ### 目錄
 
@@ -78,7 +78,8 @@ git clone https://github.com/michaelchen1225/helm-demo.git
 cd ./helm-demo
 ```
 
-此目錄就是一個可用的 Helm chart，我們先看一下這個 Helm chart 的基本目錄結構：
+此目錄就是一個 Helm chart 的基本專案結構：
+
 ```text
 helm-demo
 |-- Chart.yaml
@@ -536,7 +537,7 @@ helm lint <chart-path>
 
 查看 chart 的 template 是否符合預期：
 ```bash
-helm template <chart-path>
+helm template <chart-path> -f <values.yaml>
 ```
 
 安裝 Chart：
@@ -544,10 +545,21 @@ helm template <chart-path>
 helm install <release-name> <chart-name>
 ```
 
+僅檢查安裝 Chart 是否能成功，但並不是真的安裝：
+```bash
+helm install <release-name> <chart-name> --dry-run
+```
+
 從特定 repo 安裝 Chart：
 ```bash
 helm install <release-name> <repo-name>/<chart-name>
 ```
+
+安裝前先看看 chart-name 會部署哪些 yaml：
+```bash
+helm template <repo-name>/<chart-name> -f <values.yaml>
+```
+
 
 安裝 Chart 並修改 value：
 ```bash
@@ -635,6 +647,12 @@ helm repo list
 helm repo remove <repo-name>
 ```
 
+### 今日小結
+
+今天是「Basic Concept」章節的最後一篇，前面我們已經掌握了 k8s 中基本的概念以及相關操作，而隨著面對的 yaml 越來越多，今天也介紹了 Helm 這個方便的套件管理工具，能夠讓我們更有效率的管理、部署、升級應用服務。另外，Helm 與 k8s 一樣，都有相當完整的官方文件可以參考，通常搜尋關鍵字都能找到相關資訊。
+
+明天就會進入新的章節：「Storage」，將會介紹 k8s 中的儲存相關概念，例如 configMap、secret、volume 等，讓我們更了解如何在 k8s 中有效的管理與保存資料。
+
 ---
 
 **參考資料**
@@ -648,4 +666,3 @@ helm repo remove <repo-name>
 * [Helm Charts Tutorial: A Simple Guide for Beginners](https://devopscube.com/create-helm-chart/)
 
 * [Get started with GitLab's Helm Package Registry](https://about.gitlab.com/blog/2021/10/18/improve-cd-workflows-helm-chart-registry/)
-

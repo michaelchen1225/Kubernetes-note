@@ -1,31 +1,126 @@
 ## Kustomize 的專案結構
 
+## Kustomization.yml 的引用
+
+在[上一篇](https://github.com/michaelchen1225/Kubernetes-note/blob/master/kustomize-and-helm/01-kus-syntax.md#%E7%92%B0%E5%A2%83%E6%BA%96%E5%82%99)的語法介紹中，我們只撰寫一份 kustomization.yml，但其實一個專案中可以有多個 kustomization.yml，並相互引用。
+
+
+kustomization.yml 說白了，代表的就是一個「渲染成果」，最終也是一堆的 yaml 檔。當某份 kustomization.yml 被其他 kustomization.yml 引用時，其實是對「渲染成果」的引用，並進行第二次的渲染。
+
+我們來看一個例子：
+
+* 準備測試環境：
+
+```bash
+git clone https://github.com/michaelchen1225/kustomize-with-kustomize.git
+cd kustomize-with-kustomize
+```
+
+* 我們先在 dev 目錄下建立 kustomization.yml：
+
+```bash
+vim dev/kustomization.yml
+```
+
+```yaml
+# dev/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+- svc.yaml
+
+commonLabels:
+  env: dev
+```
+
+```bash
+kubectl kustomize dev
+```
+
+> pod.yaml 和 svc.yam 都會被加上 `env: dev` 的 Label。
+
+* 接著我們在 prod 目錄下建立 kustomization.yml：
+
+```bash
+vim prod/kustomization.yml
+```
+
+```yaml
+# prod/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../dev # 引用 dev 目錄下的 kustomization.yml
+- prod-config.yaml # prod 自己的設定
+
+
+namespace: prod
+
+commonLabels:
+  env: prod
+
+```
+
+```bash
+kubectl kustomize prod
+```
+
+觀察輸出結果，可以發現：
+
+* 在 prod/kustomization.yml 中，引用了 dev 目錄下的 kustomization.yml，所以加上 `env:dev` 的 pod.yaml 和 svc.yaml 被引用進來。
+
+* 有 `env: dev` 的 pod.yaml 和 svc.yaml 被進行二次渲染，被指定到 `namespace: prod`，並加上 `env: prod` 的 Label(覆蓋掉原本的 `env: dev`)。
+
+如果我們使用 `kubectl apply -k prod`，最終會部署的 yaml 會包括了經過二次渲染的 pod.yaml 和 svc.yaml，以及 prod 自己的 prod-config.yaml。
+
+* 我們將 prod/kustomization.yml 修改一下，讓 `env: dev` 保留下來，但加上新的 label：`version: v1`：
+
+```yaml
+# prod/kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../dev 
+- prod-config.yaml
+
+namespace: prod
+
+commonLabels:
+  version: v1
+```
+
+```bash
+kubectl kustomize prod
+```
+
+觀察輸出結果，可以發現與預期相同。總而言之，kustomization.yml 可以互相引用，進行多次的渲染，產生最終的 yaml。
+
+> **注意**：引用其他目錄的 kustomization.yml 時，在 resources 欄位中指定到 parent 目錄即可(不然會報錯)。
+
 ## Overlay 與 Base
 
-一個使用 kustomize 管理的專案目錄，建議使用以下結構：
+透過互相引用產生最終 yaml 的方式，其實在 Kustomize 是一種 Overlay 與 Base 的概念：
 
-**base 目錄**：
+* **Base**：基礎設定，放置一些通用的 yaml 樣板，例如 Pod、Service、Deployment 等。在 Base 會有一份 kustomization.yml 進行基礎的通用設定。
 
-  * Resource.yml：每個環境都會用到的 yaml 樣板。
+* **Overlay**：覆蓋設定，通常會引用 Base 的 kustomization.yml，並進行一些針對性的設定，形成最終的 yaml。
 
-  * kustomization.yml：引入需要的 `Resource.yml` + `通用設定`。
+> 以上面的例子來說，dev 目錄就是 Base，prod 目錄就是 Overlay。
 
-**overlays 目錄**：
-  
-  * 環境子目錄：不同的部署環境以「子目錄」區分，例如 overlays/dev、overlays/prod。
+總而言之，只要一個目錄中有 kustomization.yml，他就能成為其他目錄的 Base。
 
-    * Resource.yml：放置「某些環境才會用到」的 resources yaml，例如只有 prod 環境需要額外的 Ingress 設定，則就會有一個 overlays/prod/ingress.yml。
+## Kustomize 常見的專案結構
 
-    * patches：放置各種的「補丁 yaml」，針對 base 目錄下的樣本 yaml 做修改。
+在一個專案中，可能會有多個應用，每個應用可能會部署到多個環境。這時使用 base + overlays 的結構，可以讓我們針對不同的應用場景進行部署。
 
-    * kustomization.yml：引入 `base 目錄下的 kustomization.yml` + 套用 `patches` + 引入 `other resources` + `針對性設定`。 
-  
-      > 針對性設定：各種 Kustomize 原生的 Transformer 設定，例如 `namespace`、`namePrefix`、`nameSuffix`、`commonLabels` 等。
+為了使專案架構一看就知到哪些是 base、哪些是 overlays，建議直接以 base 和 overlays 命名目錄：
 
 
-我們來看一個專案的結構範例：
-
-> 專案名稱為「my-web」，其中會用到 redis 和我們自己開發的 web：
+> 專案名稱為「my-web」，其中會用到 redis 和自己開發的 web：
 
 ```plaintext
 my-web/
@@ -53,17 +148,18 @@ my-web/
         └── kustomization.yaml
 ```
 
-當我們想要針對 dev 環境作部署時，overlays/dev/kustomization.yaml 應該要：
+這個架構並非強制性的，舉例來說，你也可以將 redis 與 myapp 做成子目錄放置在一個 base 目錄下。一般來說，可以這樣設計專案的目錄結構：
 
-1. 引入：
-  * ../redis/base/kustomization.yaml  <-- statefulset.yaml + 通用設定
-  * ../myapp/base/kustomization.yaml  <-- deployment.yaml & service.yaml + 通用設定
-  * deployment-patch.yaml             <-- dev 補丁
-  * statefulset-patch.yaml            <-- dev 補丁
+* base 目錄：一定要有 kustomization.yml(才能被 overlay 引用)，並做一些基礎設定。
 
-2. 加入針對 dev 環境的設定              <-- dev 設定        
+* overlays 目錄：在底下為不同的使用場景建立子目錄(ex: overlay/dev、overlay/prod)，並在子目錄下建立 kustomization.yml，引用 base 目錄的 kustomization.yml，並針對自身需求進行設定。
+
+> 總之彈性很大，只要清楚的了解專案的目錄結構，就能用各種 kustomization.yml 進行組合，拼湊出最終的 yaml。
+
+舉例而言，現在要針對 dev 環境作部署，可以這樣設定 kustomization.yml：
 
 ```yaml
+# overlays/dev/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -71,14 +167,93 @@ resources:
 - ../../redis/base
 - ../../myapp/base
 
+namespace: dev
+
+commonLabels:
+  env: dev
+
 patches:
+- path: deployment-patch.yaml
+  target:
+    kind: Deployment
+- path: statefulset-patch.yaml
+  target:
+    kind: StatefulSet
+```
 
+如此一來，最終的 yaml 會長這樣：
 
+* 全部的 yaml 被打上 `env: dev` 的 Label。
 
-若執行 `kubectl apply -k overlays/dev/kustomization.yaml`，最終會被部署的 yaml 為：
+* 全部的 yaml 部署到 `dev` namespace。
 
-* statefulset.yaml：通用設定 + dev 補丁 + dev 設定
-* deployment.yaml：通用設定 + dev 補丁 + dev 設定
-* service.yaml：通用設定 + dev 設定
+* 所有的 deployment 都會套用 deployment-patch.yaml。
 
-> kustomization.yaml 是可以互相引用的，若設定有重疊，來源端的設定會被覆蓋。(通常是 overlay 去引用 base 的 kustomization，所以有重疊的部分以 overlay 為主)
+* 所有的 statefulset 都會套用 statefulset-patch.yaml。
+
+## Component
+
+我們來看看底下一種情境：
+
+* 這次的專案有四個部署環境：dev、test、staging、prod。
+
+* 其中除了 dev 之外，其他環境都會部署 `ingress.yaml`
+
+這時，如果我們將 ingress.yaml 放在 base 目錄顯然沒有麼合適：
+
+* 如果我們將 ingress.yaml 放在 base 目錄中，從 dev 環境切換到其他環境時，就要修改 base 目錄的 kustomization.yml 來加入 ingress.yaml、換回 dev 時又要修改來排除 ingress.yaml。這樣非常容易造成人為失誤：假如哪天有人忘記改了怎麼辦？
+
+放在 base 目錄不合適，那放在 overlays 目錄呢？ 就是除了 overlays/dev 之外，其他環境的 overlays 都要加入 ingress.yaml。
+
+但是當 ingress.yaml 更新時，就得手動同步 test、staging、prod 的 ingress.yaml，這也容易造成人為疏失。
+
+就上面介紹的慣例來說，base 就是放置「所有環境都會用到的 yaml」，似乎沒有地方放置「**大多數環**境都會用到的 yaml」，這時就可以使用 Component 的概念：
+
+* components 目錄：放置「大多數環境都會用到的 yaml」，同樣以 kustomization.yml 進行設定。
+
+這樣的好處是，當 Component 更新時，只要更新一次 Component 的 yaml，所有引用到 Component 的 overlays 都會自動更新。當哪天有其他 overlays 也需要引用 Component 時，只要在 kustomization.yml 中加入 Component 的路徑即可。
+
+我們以上面的例子來舉例：
+
+```plaintext
+my-web/
+│
+├── base/
+|
+├── componets/
+|   ├── ingress/
+|       ├── ingress.yaml
+|       └── kustomization.yaml
+| 
+├── overlays/
+    ├── dev
+    ├── test
+    ├── staging
+    └── prod
+```
+
+這時後 test、staging、prod 的 kustomization.yml 就可以這樣設定：
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../base
+- ../../components/ingress # 引用 Component
+
+<其他設定>
+```
+
+這樣一來，就成功的將 ingress 的相關設定「模組化」，讓不同的 overlays 根據自身需求引用 Component。總之，未來出現「只套用在部分環境」的 yaml 時，在 components 目錄下建立所屬的子目錄並加上 kustomization.yml 即可。
+
+## 總結
+
+* kustomization.yml 可以互相引用，進行多次的渲染，產生最終的 yaml。
+
+* 根據上述特性，理想的專案目錄架構為：
+  * base：放置全環境通用的 yaml 及設定
+  * components：將設定模組化，供不同的環境引用
+  * overlays：針對不同的環境進行設定
+
+* 核心概念：當某目錄下的 yaml 想要在多處被重複利用，直接建立 kustomization.yml 全部引用、設定即可！

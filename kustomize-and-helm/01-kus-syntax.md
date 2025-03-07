@@ -44,6 +44,8 @@
 git clone https://github.com/michaelchen1225/kustomize-simple-demo.git
 ```
 
+> 載下來之後可以先看看 yaml 裡都設定了什麼。
+
 ## Transformer
 
 ### commonLabels：統一新增 Label
