@@ -129,63 +129,63 @@ Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administr
 
 | 天數 | 主題|
 | --- | --- |
-| Day 02 |[Kubernetes 的架構與組件](https://ithelp.ithome.com.tw/articles/10345505)
-| Day 03 |[建立 Kubeadm Cluster +  Bonus Tips](https://ithelp.ithome.com.tw/articles/10345660)
-| Day 04 |[Pod](https://ithelp.ithome.com.tw/articles/10345796)
-| Day 05 |[Pod 中的環境變數與指令](https://ithelp.ithome.com.tw/articles/10345967)
-| Day 06 |[ReplicaSet、Deployment & StatefulSet](https://ithelp.ithome.com.tw/articles/10346089)
-| Day 07 |[Rolling Update & Rollback](https://ithelp.ithome.com.tw/articles/10346223)
-| Day 08 |[Namespace](https://ithelp.ithome.com.tw/articles/10346374)
-| Day 09 |[Service](https://ithelp.ithome.com.tw/articles/10346530)
-| Day 10 |[kubectl 基本操作彙整](https://ithelp.ithome.com.tw/articles/10346691)
-| Day 11 |[*專案的打包與部署 --- Helm](https://ithelp.ithome.com.tw/articles/10346850)
+| Day 02 |[Kubernetes 的架構與組件](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2002%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9AKubernetes%20%E7%9A%84%E6%9E%B6%E6%A7%8B%E8%88%87%E7%B5%84%E4%BB%B6.md)
+| Day 03 |[建立 Kubeadm Cluster +  Bonus Tips](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2003%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9A%E4%BD%BF%E7%94%A8%20Kubeadm%20%E5%BB%BA%E7%AB%8B%20Kubernetes%20Cluster%20%2B%20%E7%9B%B8%E9%97%9C%E7%9A%84%20Bonus%20Tips.md)
+| Day 04 |[Pod](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2004%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9APod.md)
+| Day 05 |[Pod 中的環境變數與指令](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2005%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9APod%20%E4%B8%AD%E7%9A%84%E7%92%B0%E5%A2%83%E8%AE%8A%E6%95%B8%E8%88%87%E6%8C%87%E4%BB%A4.md)
+| Day 06 |[ReplicaSet、Deployment & StatefulSet](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2006%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9AReplicaSet%E3%80%81Deployment%20%26%20StatefulSet.md)
+| Day 07 |[Rolling Update & Rollback](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2007%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9ARolling%20Update%20%26%20Rollback.md)
+| Day 08 |[Namespace](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2008%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9ANamespace.md)
+| Day 09 |[Service](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2009%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9AService.md)
+| Day 10 |[kubectl 基本操作彙整](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2010%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9Akubectl%20%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E5%BD%99%E6%95%B4.md)
+| Day 11 |[*專案的打包與部署 --- Helm](https://github.com/michaelchen1225/CKA-note/blob/main/01%20Basic%20Concept/Day%2011%20-%E3%80%90Basic%20Concept%E3%80%91%EF%BC%9AHelm.md)
 
 2. **Storage**：
 
 | 天數 | 主題|
 | --- | --- |
-| Day 12 |[ConfigMap & Secret](https://ithelp.ithome.com.tw/articles/10347004)
-| Day 13 |[Volume 的三種基本應用 --- emptyDir、hostPath、configMap & secret](https://ithelp.ithome.com.tw/articles/10347182)
-| Day 14 |[PV、PVC & StorageClass](https://ithelp.ithome.com.tw/articles/10347335)
+| Day 12 |[ConfigMap & Secret](https://github.com/michaelchen1225/CKA-note/blob/main/02%20Storage/Day%2012%20-%E3%80%90Storage%E3%80%91%EF%BC%9AConfigMap%20%26%20Secret.md)
+| Day 13 |[Volume 的三種基本應用 --- emptyDir、hostPath、configMap & secret](https://github.com/michaelchen1225/CKA-note/blob/main/02%20Storage/Day%2013%20-%E3%80%90Storage%E3%80%91%EF%BC%9AVolume%20%E7%9A%84%E4%B8%89%E7%A8%AE%E5%9F%BA%E6%9C%AC%E6%87%89%E7%94%A8%20---%20emptyDir%E3%80%81hostPath%E3%80%81configMap%20%26%20secret.md)
+| Day 14 |[PV、PVC & StorageClass](https://github.com/michaelchen1225/CKA-note/blob/main/02%20Storage/Day%2014%20-%E3%80%90Storage%E3%80%91%EF%BC%9A%20PV%E3%80%81PVC%20%26%20StorageClass.md)
 
 
 3. **Workloads & Scheduling**：
 
 | 天數 | 主題|
 | --- | --- |
-| Day 15 |[Manual Scheduling(上)：nodeName & nodeSelector](https://ithelp.ithome.com.tw/articles/10347495)
-| Day 16 |[Manual Scheduling(下)：Affinity & Taint](https://ithelp.ithome.com.tw/articles/10347661)
-| Day 17 |[Static Pod & DaemonSet](https://ithelp.ithome.com.tw/articles/10347876)
-| Day 18 |[*進階部署策略：Blue-Green & Canary](https://ithelp.ithome.com.tw/articles/10348066)
-| Day 19 |[資源管理 --- Pod QoS、LimitRange & ResourceQuota](https://ithelp.ithome.com.tw/articles/10348214)
+| Day 15 |[Manual Scheduling(上)：nodeName & nodeSelector](https://github.com/michaelchen1225/CKA-note/blob/main/03%20Workloads%20%26%20Scheduling/Day%2015%20-%E3%80%90Workloads%20%26%20Scheduling%E3%80%91%EF%BC%9AManual%20Scheduling(%E4%B8%8A)%EF%BC%9AnodeName%20%26%20nodeSelector.md)
+| Day 16 |[Manual Scheduling(下)：Affinity & Taint](https://github.com/michaelchen1225/CKA-note/blob/main/03%20Workloads%20%26%20Scheduling/Day%2016%20-%E3%80%90Workloads%20%26%20Scheduling%E3%80%91%EF%BC%9AManual%20Scheduling(%E4%B8%8B)%EF%BC%9AAffinity%20%26%20Taint.md.md)
+| Day 17 |[Static Pod & DaemonSet](https://github.com/michaelchen1225/CKA-note/blob/main/03%20Workloads%20%26%20Scheduling/Day%2017-%E3%80%90Workloads%20%26%20Scheduling%E3%80%91%EF%BC%9AStatic%20Pod%20%26%20DaemonSet.md)
+| Day 18 |[*進階部署策略：Blue-Green & Canary](https://github.com/michaelchen1225/CKA-note/blob/main/03%20Workloads%20%26%20Scheduling/Day%2018-%E3%80%90Workloads%20%26%20Scheduling%E3%80%91%EF%BC%9A%E9%80%B2%E9%9A%8E%E9%83%A8%E7%BD%B2%E7%AD%96%E7%95%A5%EF%BC%9ABlue%20Green%20%26%20Canary.md)
+| Day 19 |[資源管理 --- Pod QoS、LimitRange & ResourceQuota](https://github.com/michaelchen1225/CKA-note/blob/main/03%20Workloads%20%26%20Scheduling/Day%2019-%E3%80%90Workloads%20%26%20Scheduling%E3%80%91%EF%BC%9A%E8%B3%87%E6%BA%90%E7%AE%A1%E7%90%86%20---%20Pod%20QoS%E3%80%81LimitRange%20%26%20ResourceQuota.md)
 
 
 4. **Services & Networking**：
 
 | 天數 | 主題|
 | --- | --- |
-| Day 20 |[Kubernetes 的網路基本架構](https://ithelp.ithome.com.tw/articles/10348418)
-| Day 21 |[TLS/SSL in Kubernetes](https://ithelp.ithome.com.tw/articles/10348555)
-| Day 22 |[憑證管理與kubeconfig](https://ithelp.ithome.com.tw/articles/10348787)
-| Day 23 |[Service 的路由 --- Ingress](https://ithelp.ithome.com.tw/articles/10349141)
-| Day 24 |[Pod 的守門員 --- Network Policy](https://ithelp.ithome.com.tw/articles/10349422)
+| Day 20 |[Kubernetes 的網路基本架構](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2020%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9AKubernetes%20%E7%9A%84%E7%B6%B2%E8%B7%AF%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%A7%8B.md)
+| Day 21 |[TLS/SSL in Kubernetes](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2021%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9ATLS%20in%20Kubernetes.md)
+| Day 22 |[憑證管理與kubeconfig](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2022%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9A%E6%86%91%E8%AD%89%E7%AE%A1%E7%90%86%E8%88%87kubeconfig.md)
+| Day 23 |[Service 的路由 --- Ingress](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2023%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9AService%20%E7%9A%84%E8%B7%AF%E7%94%B1%20---%20Ingress.md)
+| Day 24 |[Pod 的守門員 --- Network Policy]https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2024%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9A%E7%B6%B2%E8%B7%AF%E9%80%A3%E7%B7%9A%E7%9A%84%E5%AE%88%E9%96%80%E5%93%A1%20---%20Network%20Policy.md)
 
 5. **Cluster Configuration**：
 
 | 天數 | 主題|
 | --- | --- |
-| Day 25 |[Cluster upgrade](https://ithelp.ithome.com.tw/articles/10349662)
-| Day 26 |[etcd 的備份與還原](https://ithelp.ithome.com.tw/articles/10349968)
-| Day 27 |[權限管理 (一)：RBAC](https://ithelp.ithome.com.tw/articles/10350434)
-| Day 28 |[權限管理 (二)：Service Account](https://ithelp.ithome.com.tw/articles/10351070)
-| Day 29 |[權限管理 (三)：Security Context](https://ithelp.ithome.com.tw/articles/10352051)
+| Day 25 |[Cluster upgrade](https://github.com/michaelchen1225/CKA-note/blob/main/05%20Cluster%20Architecture%2C%20Installation%20%26%20Configuration/Day%2025%20-%20%E3%80%90Cluster%20Configuration%E3%80%91%EF%BC%9ACluster%20upgrade.md)
+| Day 26 |[etcd 的備份與還原](https://github.com/michaelchen1225/CKA-note/blob/main/05%20Cluster%20Architecture%2C%20Installation%20%26%20Configuration/Day%2026%20-%20%E3%80%90Cluster%20Configuration%E3%80%91%EF%BC%9Aetcd%20%E7%9A%84%E5%82%99%E4%BB%BD%E8%88%87%E9%82%84%E5%8E%9F.md)
+| Day 27 |[權限管理 (一)：RBAC](https://github.com/michaelchen1225/CKA-note/blob/main/05%20Cluster%20Architecture%2C%20Installation%20%26%20Configuration/Day%2027%20-%20%E3%80%90Cluster%20Configuration%E3%80%91%EF%BC%9A%E6%AC%8A%E9%99%90%E7%AE%A1%E7%90%86%20(%E4%B8%80)%EF%BC%9ARBAC.md)
+| Day 28 |[權限管理 (二)：Service Account](https://github.com/michaelchen1225/CKA-note/blob/main/05%20Cluster%20Architecture%2C%20Installation%20%26%20Configuration/Day%2028%20-%20%E3%80%90Cluster%20Configuration%E3%80%91%EF%BC%9A%E6%AC%8A%E9%99%90%E7%AE%A1%E7%90%86%20(%E4%BA%8C)%EF%BC%9AService%20Account.md)
+| Day 29 |[權限管理 (三)：Security Context](https://github.com/michaelchen1225/CKA-note/blob/main/05%20Cluster%20Architecture%2C%20Installation%20%26%20Configuration/Day%2029%20-%20%E3%80%90Cluster%20Configuration%E3%80%91%EF%BC%9A%E6%AC%8A%E9%99%90%E7%AE%A1%E7%90%86%20(%E4%B8%89)%EF%BC%9ASecurity%20Context.md)
 
 6. **Troubleshooting & Monitoring**：
 
 | 天數 | 主題|
 | --- | --- |
-| Day 30 |[Pod 的生命週期與監控](https://ithelp.ithome.com.tw/articles/10352785)
-| Day 31 |[Troubleshooting 小技巧](https://ithelp.ithome.com.tw/articles/10353454)
+| Day 30 |[Pod 的生命週期與監控](https://github.com/michaelchen1225/CKA-note/blob/main/06%20Troubleshooting%20%26%20Monitoring/Day%2030%20-%E3%80%90Monitoring%E3%80%91%EF%BC%9APod%20%E7%9A%84%E5%91%BD%E9%80%B1%E6%9C%9F%E8%88%87%E7%9B%A3%E6%8E%A7.md)
+| Day 31 |[Troubleshooting 小技巧](https://github.com/michaelchen1225/CKA-note/blob/main/06%20Troubleshooting%20%26%20Monitoring/Day%2031%20-%E3%80%90Troubleshooting%E3%80%91%EF%BC%9ATroubleshooting%20%E5%B0%8F%E6%8A%80%E5%B7%A7.md)
 
 在文章的內容方面，系列的章節雖然以 CKA 的考試領域來劃分，但仍會提及 CKA 考試範圍之外的概念與相關實作，盡可能的涵蓋 K8s 的基礎操作，不會因為「這個考試不考、所以不寫了」。
 
