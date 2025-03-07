@@ -169,7 +169,7 @@ Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administr
 | Day 21 |[TLS/SSL in Kubernetes](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2021%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9ATLS%20in%20Kubernetes.md)
 | Day 22 |[憑證管理與kubeconfig](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2022%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9A%E6%86%91%E8%AD%89%E7%AE%A1%E7%90%86%E8%88%87kubeconfig.md)
 | Day 23 |[Service 的路由 --- Ingress](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2023%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9AService%20%E7%9A%84%E8%B7%AF%E7%94%B1%20---%20Ingress.md)
-| Day 24 |[Pod 的守門員 --- Network Policy]https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2024%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9A%E7%B6%B2%E8%B7%AF%E9%80%A3%E7%B7%9A%E7%9A%84%E5%AE%88%E9%96%80%E5%93%A1%20---%20Network%20Policy.md)
+| Day 24 |[Pod 的守門員 --- Network Policy](https://github.com/michaelchen1225/CKA-note/blob/main/04%20Services%20%26%20Networking/Day%2024%20-%E3%80%90Services%20%26%20Networking%E3%80%91%EF%BC%9A%E7%B6%B2%E8%B7%AF%E9%80%A3%E7%B7%9A%E7%9A%84%E5%AE%88%E9%96%80%E5%93%A1%20---%20Network%20Policy.md)
 
 5. **Cluster Configuration**：
 
