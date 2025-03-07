@@ -99,7 +99,7 @@ K8s 累積了相當龐大且活躍的開源生態，其中各種的插件與應�
 
 ## 用 CKA 入門 Kubernetes
 
-CKA 的考試範圍涵蓋了 Kubernetes 大部分的基礎概念，因此可以用「考過 CKA」來當作入門 K8s 的標準。
+Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administrator(CKA)」證照可以當作一個不錯的入門選擇，因為 CKA 的考試範圍涵蓋了 Kubernetes 大部分的基礎概念，其中也包括了許多的基本操作。
 
 > 也不一定要花錢拿到證照，不過具備 CKA 的基礎知識對於後續深挖 K8s 會有很大的幫助。
 
