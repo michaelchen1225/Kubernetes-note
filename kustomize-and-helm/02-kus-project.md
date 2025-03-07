@@ -1,26 +1,26 @@
 ## Kustomize 的專案結構
 
+## Overlay 與 Base
+
 一個使用 kustomize 管理的專案目錄，建議使用以下結構：
 
-* **base 目錄**：
+**base 目錄**：
 
-  * resources：放置「樣版 yaml」，是每個環境都會用到的資源。
+  * Resource.yml：每個環境都會用到的 yaml 樣板。
 
-  * kustomization.yml：引入需要的`樣板 yaml` + 加入`通用設定`。
+  * kustomization.yml：引入需要的 `Resource.yml` + `通用設定`。
 
-* **overlays 目錄**：
+**overlays 目錄**：
   
   * 環境子目錄：不同的部署環境以「子目錄」區分，例如 overlays/dev、overlays/prod。
 
-    * other resources：放置「某些環境才會用到」的 resources yaml，例如只有 prod 環境需要額外的 Ingress 設定，則就會有一個 overlays/prod/ingress.yml。
+    * Resource.yml：放置「某些環境才會用到」的 resources yaml，例如只有 prod 環境需要額外的 Ingress 設定，則就會有一個 overlays/prod/ingress.yml。
 
     * patches：放置各種的「補丁 yaml」，針對 base 目錄下的樣本 yaml 做修改。
 
-    * kustomization.yml：引入 `base 目錄下的 kustomization.yml` + 套用 `patches` + 加入`針對性設定` + 引入 `other resources` 
+    * kustomization.yml：引入 `base 目錄下的 kustomization.yml` + 套用 `patches` + 引入 `other resources` + `針對性設定`。 
   
-  > patches v.s 針對性設定：pathces 是額外的 yaml 檔被引入到 kustomization.yml，而「針對性設定」是**直接寫**在 kustomization.yml 中。由於某些設定並不支援在 kustomization.yml 中直接寫，因此需要透過 patches 來修改。
-
-  > 舉例而言，memory limit & request 就需要用 patches 來修改，而 image 則可以直接在 kustomization.yml 中指定。
+      > 針對性設定：各種 Kustomize 原生的 Transformer 設定，例如 `namespace`、`namePrefix`、`nameSuffix`、`commonLabels` 等。
 
 
 我們來看一個專案的結構範例：

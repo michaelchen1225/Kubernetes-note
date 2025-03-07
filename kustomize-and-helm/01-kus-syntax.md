@@ -48,7 +48,6 @@ git clone https://github.com/michaelchen1225/kustomize-simple-demo.git
 
 ### commonLabels：統一新增 Label
 
-
 `commonLabels` 會在「所有有關 Label」的地方打上指定的 Label：
 
 * 如果 Label 欄位不存在，則會新增該欄位
