@@ -11,6 +11,7 @@
 * [Component](#component)
   * [Component 與 Overlay 的關係：先合併後渲染](#component-與-overlay-的關係先合併後渲染)
   * [Component --- patch 模組化](#component-----patch-模組化)
+  * [Base vs Component](#base-vs-component)
 
 * [總結](#總結)
 
@@ -19,7 +20,7 @@
 在[上一篇](https://github.com/michaelchen1225/Kubernetes-note/blob/master/kustomize-and-helm/01-kus-syntax.md#%E7%92%B0%E5%A2%83%E6%BA%96%E5%82%99)的語法介紹中，我們只撰寫一份 kustomization.yml，但其實一個專案中可以有多個 kustomization.yml，並相互引用。
 
 
-kustomization.yml 說白了，代表的就是一個「渲染成果」，最終也是一堆的 yaml 檔。當某份 kustomization.yml 被其他 kustomization.yml 引用時，其實是對「渲染成果」的引用，並進行第二次的渲染。
+kustomization.yml 本質上是一個『渲染成果』，最終輸出為多個 YAML 檔。被其他 kustomization.yml 引用時，相當於對該成果進行二次渲染。
 
 我們來看一個例子：
 
@@ -113,7 +114,7 @@ kubectl kustomize prod
 
 ## Overlay 與 Base
 
-透過互相引用產生最終 yaml 的方式，其實在 Kustomize 是一種 Overlay 與 Base 的概念：
+透過互相引用產生最終 yaml 的方式，在 Kustomize 被稱為 Overlay 與 Base 的概念：
 
 * **Base**：基礎設定，放置一些通用的 yaml 樣板，例如 Pod、Service、Deployment 等。在 Base 會有一份 kustomization.yml 進行基礎的通用設定。
 
@@ -127,7 +128,7 @@ kubectl kustomize prod
 
 在一個專案中，可能會有多個應用，每個應用可能會部署到多個環境。這時使用 base + overlays 的結構，可以讓我們針對不同的應用場景進行部署。
 
-為了使專案架構一看就知到哪些是 base、哪些是 overlays，建議直接以 base 和 overlays 命名目錄：
+為了使專案架構一看就知到哪些是 base、哪些是 overlays，建議以 base 和 overlays 命名目錄：
 
 
 > 專案名稱為「my-web」，其中會用到 redis 和自己開發的 web：
@@ -221,7 +222,7 @@ patches:
 
 * components 目錄：放置「大多數環境都會用到的 yaml」，同樣以 kustomization.yml 進行設定。
 
-這樣的好處是，當 Component 更新時，只要更新一次 Component 的 yaml，所有引用到 Component 的 overlays 都會自動更新。當哪天有其他 overlays 也需要引用 Component 時，只要在 kustomization.yml 中加入 Component 的路徑即可。
+如此一來，更新 Component yaml 時，所有引用的 overlays 都會自動同步。若有新的 overlays 需要它，只需在 kustomization.yml 中添加路徑即可。
 
 我們以上面的例子來舉例：
 
@@ -482,6 +483,16 @@ components:
 
 這樣一來，replicas-patch 就可以被重複利用，並且只要更新一次 replicas-patch.yaml，所有引用到的 overlays 都會自動更新。
 
+### Base vs Component
+
+下表整理了 Base 與 Component 的差異：
+
+| 項目         | Base                                    | Component         |
+|-------------|--------------------------------------|--------------------------------------|
+| 作用         | 提供所有環境通用的資源與設定             | 提供部分環境會用到的額外資源或設定        
+| 被引用方式   | `resources:`                         | `components:`                        |
+| 適用情境     | 所有環境都會用到的設定與資源           | 只適用於部分環境的設定或補丁             |
+| 是否影響 Overlay | **不會**，Base 只提供基礎設定       | **會**，Component 會與 Overlay 設定合併 |
 
 ## 總結
 

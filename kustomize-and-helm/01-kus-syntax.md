@@ -24,6 +24,12 @@
   * [replace --- 重新改寫](#replace-----重新改寫)
   * [一次 Patch 多個 Resource](#一次-patch-多個-resource)
 
+* [configMapGenerator、secretGenerator](#configmapgeneratorsecretgenerator)
+  * [configMapGenerator --- 生成內涵檔案的 ConfigMap](#configmapgenerator-----生成內涵檔案的-configmap)
+  * [configMapGenerator --- 生成帶有 key-value 的 ConfigMap](#configmapgenerator-----生成帶有-key-value-的-configmap)
+  * [從 .env 檔案生成 ConfigMap](#從-env-檔案生成-configmap)
+  * [secretGenerator --- 生成 Secret](#secretgenerator-----生成-secret)
+
 ## 名詞解釋
 
 * Transformer：為**全部**的樣本 yaml 套用某種通用變更。kustomize 有內建許多的 Transformer 可以使用，例如 commonLabels、commonAnnotations、namespace、namePrefix、nameSuffix、image 等等。
@@ -426,7 +432,195 @@ patches:
     kind: Deployment
 ```
 
+## configMapGenerator、secretGenerator
 
+configMapGenerator 可以用來來生成 ConfigMap、secretGenerator 可以用來生成 Secret。
+
+### configMapGenerator --- 生成內涵檔案的 ConfigMap
+
+* 建立測試目錄：
+
+```bash
+$DEMO_HOME=$(mktemp -d)
+cd $DEMO_HOME
+```
+
+* 建立檔案：
+
+```bash
+cat <<EOF >config-file.properties
+this is a config file
+EOF
+```
+
+* 撰寫 pod.yaml，引用需要被生成的 ConfigMap：
+
+```bash
+cat <<EOF >pod.yaml
+#pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+    volumeMounts:
+    - name: my-volume
+      mountPath: /etc/config
+  volumes:
+  - name: my-volume
+    configMap:
+      name: my-configmap
+EOF
+```
+
+* 撰寫 kustomization.yml，生成 ConfigMap：
+
+```yaml
+#kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+configMapGenerator:
+- name: my-configmap
+  files:
+  - comfig-file.properties
+```
+
+* 實際把 pod、configMap 跑起來看看：
+
+```bash
+kubectl apply -k .
+```
+
+* 可以在 my-pod 中的 /etc/config 看到 config-file.properties 的內容：
+
+```bash
+kubectl exec -i my-pod -- cat /etc/config/config-file.properties
+```
+
+* 清除資源：
+
+```bash
+kubectl delete -k .
+```
+
+### configMapGenerator --- 生成帶有 key-value 的 ConfigMap
+
+* kustomization.yml：
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+configMapGenerator:
+- name: my-configmap
+  literals:
+  - NAME=Michael
+  - Age=25
+
+generatorOptions:
+ disableNameSuffixHash: true  # 關閉 comfigMap 生成後加上的 hash
+ labels:  # 給 ConfigMap 加上 Label
+  demo: configMapGenerator
+```
+
+* 修改 pod.yaml，讓 pod 從 ConfigMap 中取得環境變數：
+
+```bash
+cat <<EOF >pod.yaml
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: my-pod
+
+spec:
+  containers:
+  - name: my-container
+    image: nginx
+    envFrom:
+    - configMapRef:
+        name: my-configmap
+EOF
+```
+
+* 實際把 pod、configMap 跑起來看看：
+
+```bash
+kubectl apply -k .
+```
+
+* 可以在 my-pod 中的環境變數看到 NAME=Michael 和 Age=25：
+
+```bash
+kubectl exec -i my-pod -- env
+```
+
+### 從 .env 檔案生成 ConfigMap 
+
+* 若環境變數太多，可以先寫在 .env 檔案中，再透過 configMapGenerator 生成 ConfigMap：
+
+```bash
+cat <<EOF >.env
+NAME=Michael
+Age=25
+Birthday=1996-12-25
+EOF
+```
+
+* kustomization.yml：
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- pod.yaml
+
+configMapGenerator:
+- name: my-configmap
+  envs:
+  - .env
+```
+
+### secretGenerator --- 生成 Secret
+
+用法和 configMapGenerator 基本相同，把 configMapGenerator 改成 secretGenerator 即可：
+
+```bash
+echo -n "Michael" > user.txt
+echo -n "123456" > password.txt
+```
+
+```yaml
+# kustomization.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+secretGenerator:
+- name: my-secret
+  files:
+  - user.txt
+  - password.txt
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    demo: secretGenerator
+```
+
+```bash
+kubectl kustomize .
+```
 
 ## 小結
 
