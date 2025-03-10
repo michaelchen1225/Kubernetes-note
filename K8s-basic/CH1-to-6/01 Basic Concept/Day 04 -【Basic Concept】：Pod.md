@@ -1,20 +1,20 @@
-### 今日目標
+## 【Basic Concept】：Pod
 
----
-* 如何建立 Pod？
-  * 使用 yaml 建立
-  * 使用 kubectl 建立
-  * 快速產生 yaml 樣本
+## 目錄
 
-* 關於 Pod 的 kubectl 基本操作
+* [如何建立 Pod ?](#如何建立-pod)
 
-* Pod 的基本除錯
-  * kubectl describe & kubectl logs
+  * [方法1：使用 yaml 檔案](#方法1使用-yaml-檔案建立-pod)
 
-* Multi-Container Pod
-  * Init Container
-  * Sidecar Container
-***
+  * [方法2：使用 kubectl 指令](#方法2使用-kubectl-指令建立-pod)
+
+* [Pod的基本操作指令](#其他Pod的基本操作指令)
+
+* [Pod的基本除錯](#pod-的基本除錯)
+
+* [Multi-Container Pod](#multi-container-pod)
+  * [Init Container](#init-container)
+  * [Sidecar Container](#sidecar-container)
 
 [昨天](https://ithelp.ithome.com.tw/articles/10345660)我們成功建立了練習用的 cluster，今天來試試看動手建立 k8s 的基本執行單位 --- Pod。
 
@@ -214,7 +214,7 @@ multi-container-pod   2/2     Running   0          32s
 ```
 > 可以看到 READY 欄位是 2/2，表示這個 Pod 中有兩個容器，且都是 Ready 狀態。
 
-### 其他Pod的基本操作指令
+## Pod 的基本操作指令
 
 建立 Pod 之後，你可能會問：我要怎麼知道 Pod 有沒有正常運作？哪裡可以查看關於這個 Pod 的詳細資料？如何刪除 Pod？有沒有其他與 Pod 相關的指令可以使用？
 
@@ -353,7 +353,7 @@ kubectl get pod busybox -o jsonpath='{.status.podIP}'
 有關 jsonpath 的應用可參考[附錄](https://github.com/michaelchen1225/CKA-note/blob/main/%E9%99%84%E9%8C%84/%E9%99%84%E9%8C%841-jsonpath.md)。
 ***
 
-### Pod 的基本除錯
+## Pod 的基本除錯
 
 在上面的指令中，kubectl describe 和 kubectl logs 是相當基本且重要的除錯指令，兩者的差別主要是：
 
@@ -502,7 +502,7 @@ kubectl logs web
 
 如果我們用 describe 指令查看 Pod 的 Events，Events中並沒有看到這個請求，原因是「回應 curl」並不屬於 cluster 層級的事件，而是屬於 container 層級的事件。這樣是不是能夠比較了解「以 cluster 的角度」和「以 container 的角度」的差異呢？
 
-### Multi-Container Pod
+## Multi-Container Pod
 
 前面提到 Pod 中可以有**多個**容器，而這些容器可以分為兩種常見的應用類型：Init Container 和 Sidecar Container。
 
@@ -587,7 +587,7 @@ kubectl logs init-demo -c init-container1
 Initializing...
 ```
 
-**Sidecar Container**
+### Sidecar Container
 
 Sidecar container 其實就是普通的容器，會與主容器同時運作並扮演著輔助的角色，例如在主要的 web 容器旁邊附加一個 log 容器，用來收集 web 容器的log，底下我們來實作看看：
 
@@ -602,7 +602,7 @@ Sidecar container 其實就是普通的容器，會與主容器同時運作並�
 ---
 **補充說明**
 
-> volume 的概念會在後面的 [Day 13](https://ithelp.ithome.com.tw/articles/10347182) 介紹，這裡可以先理解成兩個容器共享一個叫做 shared-logs 的「硬碟」，分別掛載到 :
+> Volume 的概念會在後面的 [Day 13](https://ithelp.ithome.com.tw/articles/10347182) 介紹，這裡可以先理解成兩個容器共享一個叫做 shared-logs 的「硬碟」，分別掛載到 :
 
 * main-container 的 /var/log
 * sidecar-container 的 /logs
@@ -661,7 +661,7 @@ kubectl logs -f sidecar-demo -c sidecar-container
 ```
 > 可以看到 sidecar-container 不斷地輸出日期！
 
-### 今日小結
+## 今日小結
 
 今天介紹了 Pod 的一些基本操作，建議讀者將每個指令與操作都實際操作一遍，熟悉一遍後不妨試試看能不能自己還原出 initContainer 與 sidecar 的實作，如果可以的話相信對今天內容就有一定的掌握了！
 

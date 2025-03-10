@@ -1,15 +1,20 @@
-### 今日目標
+## 【Basic Concept】：Rolling Update & Rollback
 
-* Deployment 的 Update Strategy
-  * Recreate vs Rolling Update
-  * Rolling Update 的進階設定：minReadySeconds、maxSurge、maxUnavailable
+## 目錄
 
-* Rollout history
-  * 標記 CHANGE-CAUSE：註解每次更新的原因
+* [Update Strategy](#update-strategy)
 
-* Rollback
+* [Rolling Update](#rolling-update)
 
-在昨天的文章中，我們有提到 Deployment 可以達成 Rolling Update，並且稍微展示了 Update 的效果，也就是更新 image。今天我們來更深入地討論 Rolling update 與 Rollback。
+* [Recreate vs RollingUpdate](#recreate-vs-rollingupdate)
+
+* [Rolling Update 的進階設定](#rolling-update-的進階設定)
+
+* [Rollout history & CHANGE-CAUSE](#rollout-history--change-cause)
+
+* [Rollback](#rollback)
+
+在昨天的章節中，我們有提到 Deployment 可以達成 Rolling Update，並且稍微展示了 Update 的效果，也就是更新 image。今天我們來更深入地討論 Rolling update 與 Rollback。
 
 ### Update Strategy
 
@@ -217,7 +222,7 @@ spec:
 
 * **minReadySeconds**：在一個 Pod 更新後(Status 為 Ready)，預設上 k8s 會直接更新下一個 Pod，如果這時 Pod 還沒初始化完成就對外開放，部分使用者可能會無法存取服務。透過設定「minReadySeconds」，讓 Pod 在 Ready 後有 n 秒啟動或初始化的時間，然後 k8s 才會繼續更新下一個 template。
 
-* **maxSurge**：X 可以是「整數」或「%」若 X=1，表示最多容許更新過程中存在「desired number + 1」個 Pod 處於 Running 的狀態。
+* **maxSurge**：X 可以是「整數」或「%。若 X=1，表示最多容許更新過程中存在「desired number + 1」個 Pod 處於 Running 的狀態。
 
 * **maxUnavailable**：Y 可以是「整數」或「%」，但不能同時與 X 設為 0。若 Y=1，表示最多容許更新過程中存在「1」個 Pod 無法提供服務(Status 不是 Ready)。
 
@@ -259,7 +264,7 @@ spec:
 
 > 更新時，k8s 最多可建立 2 個新 Pod，並且至少要維持 8 個 Pod 是可被存取的(status 為 Ready)。
 
-### Rollout history
+### Rollout history & CHANGE-CAUSE
 
 更新後，我們可以用 kubectl rollout history 來查看更新的歷史紀錄：
 

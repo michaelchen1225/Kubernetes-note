@@ -1,14 +1,16 @@
-# Day 08 -【Basic Concept】：Namespace
+## 【Basic Concept】：Namespace
 
-### 今日目標
+## 目錄
 
-* 了解 Namespace 的用途
+* [什麼是 Namespace？](#什麼是-namespace)
 
-* Namespace 的基本操作
-  * 建立 Namespace
-  * 在特定 Namespace 中進行操作
+* [預設的四大 Namespace](#預設的四大-namespace)
 
-### 什麼 Namespace?
+* [建立 Namespace](#建立-namespace)
+
+* [namespace 的基本操作](#namespace-的基本操作)
+
+### 什麼是 Namespace？
 
 假如一個公司讓所有部門共用同一個 cluster，可能會有一些問題：
 

@@ -1,10 +1,17 @@
-### 今日目標
+## 【Basic Concept】：Pod 中的環境變數與指令
 
-* 設定 Pod 的環境變數
+## 目錄
 
-* 設定 Pod 的指令 (command) 與參數 (arguments)
+* [Pod 中的環境變數](#pod-中的環境變數)
+  * [使用 downward API 將 Pod 的資訊當作環境變數](#使用-downward-api-將-pod-的資訊當作環境變數)
 
-###  Pod 中的環境變數
+* [Pod 中的指令 (command) 與參數 (arguments)](#pod-中的指令-command-與參數-arguments)
+
+* [Command & Arguments in Dockerfile](#command--arguments-in-dockerfile)
+
+* [Command & Arguments in Pod](#command--arguments-in-pod)
+
+##  Pod 中的環境變數
 
 在許多應用場景中，「環境變數( environment variables )」是一種相當常見設定，而環境變數通常由一對 key-value 組成，例如 USER=root。
 
@@ -136,7 +143,6 @@ kubectl logs env-from-pod-info
 node01 env-from-pod-info default 192.168.1.9
 ```
 
-
 ### Pod 中的指令 (command) 與參數 (arguments)
 
 如果用用指令建立一個 busybox 的 Pod ，且不帶任何參數，看看會發生什麼事：
@@ -181,14 +187,14 @@ kubectl exec -it busybox -c <container_name> -- /bin/sh
 
 **kubectl exec 選項解釋**
 
-* -i: 進入互動模式
-* -t: 分配一個tty(終端機)
+* -i：進入互動模式
+* -t：分配一個tty(終端機)
 
 ***
 
 底下我們就來談談 command 與 arguments 在 Pod 中的設定。不過在此之前，我們來看看 Dockerfile 中的是怎麼設定的。
 
-### Command & Arguments in Dockerfile
+## Command & Arguments in Dockerfile
 
 我們知道 Linux 指令的基本格式是：
 ```bash
@@ -274,7 +280,7 @@ HOSTNAME=1ffc3b13a131
 HOME=/root
 ```
 
-### Command & Arguments in Pod
+## Command & Arguments in Pod
 
 了解了 Dockerfile 中的 command 與 arguments 後，我們來看看 Pod 中的設定：
   
@@ -419,7 +425,7 @@ spec:
 ***
 
 
-### 今日小結
+## 今日小結
 
 今天透過 Dockerfile 與 yaml 的比較，來介紹 Pod 中的 command 與 arguments 的設定方式。總之，使用「/bin/sh -c」是相當常用且方便的技巧，可以讓我們在 yaml 中更方便的設定指令。
 

@@ -1,20 +1,21 @@
-# Day 10 -【Basic Concept】：kubectl 基本操作彙整
+## 【Basic Concept】：kubectl 基本操作彙整
 
-### 今日目標
+## 目錄
 
-* kubectl 常用指令整理
-  * get & describe
-   * Pod
-   * Deployment
-   * Service
+* [物件類別縮寫](#物件類別縮寫)
 
-* kubectl 的小技巧：
-  * 物件資源縮寫
-  * 快速產生 yaml 樣本
-  * 忘記指令語法？使用 -h
-  * 強制刪除與重新建立
+* [常用指令整理 --- get & describe](#常用指令整理-----get--describe)
 
-* 修改現有的物件：kubectl edit
+* [常用指令整理：Pod](#常用指令整理pod)
+
+* [常用指令整理：Deployment](#常用指令整理deployment)
+
+* [常用指令整理：Service](#常用指令整理service)
+
+* [kubectl 的小技巧](#kubectl-的小技巧)
+
+* [修改現有物件：kubectl edit](#修改現有的物件kubectl-edit)
+
 
 
 今天是「Basic Concept」章節的倒數第二篇，我們在前面幾天介紹了 Kubernetes 中的基本物件，其中大量的操作都是透過 kubectl 這個指令來完成的，所以管理者最好能快速且熟練的使用 kubectl。
@@ -25,7 +26,7 @@
 
 > 要在 kubectl 中指定 Namespace，加入「-n」參數即可，例如：「kubectl -n kube-system get po」，底下就不特別整理了。
 
-### 物件類別縮寫：
+### 物件類別縮寫
 
 在 kubectl 指令中，我們常常需要指定資源類別，而縮寫可以大大加快下指令的速度，以下是常見的縮寫：
 
@@ -243,6 +244,8 @@ kubectl create service <service-type> <service-name> --tcp <port-number>:<target
 ```bash
 kubectl logs svc/<service-name>
 ```
+
+---
 
 ### kubectl 的小技巧
 
