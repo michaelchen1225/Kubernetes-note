@@ -1,21 +1,28 @@
-### 今日目標
+## 【Basic Concept】：使用 Kubeadm 建立 Kubernetes Cluster + 相關的 Bonus Tips
+
+## 目錄
+
+* [Kubeadm](#方法二--kubeadm)
+  * [STEP 1：準備環境(VM 與 SSH)](#step-1準備環境)
+  * [STEP 2：安裝 Container Runtime](#step-2安裝-container-runtime)
+  * [STEP 3：安裝必要組件: kubelet、kubeadm、kubectl](#step-3安裝必要組件-kubeletkubeadmkubectl)
+  * [STEP 4：關閉 swap 並啟用 ip_forward](#step4關閉-swap-並啟用-ip_forward)
+  * [STEP 5：初始化 Master Node](#step-5初始化-master-node)
+  * [STEP 6：加入 Worker Node](#step-6加入-worker-node)
+  * [STEP 7：安裝 CNI plugin](#step-7安裝-cni-plugin)
+  * [Optional：加入新的 Worker Node](#加入新的-worker-node)
+
+
+* [Bonus Tips](#bonus-tips-optional)
+  * [設定 kubectl bash completion](#tips-1kubectl-bash-completion)
+  * [在 Worker Node 使用 kubectl](#tips-2在-worker-node-使用-kubectl)
+  * [kubeadm 初始化過程中的除錯](#tips-3初始化過程中的除錯)
+  * [建立 single node cluster](#tips-4single-node-cluster)
+  * [移除 cluster 中的 Worker Node](#tips-5移除-cluster-中的-worker-node)
+
+* [重要提醒：「使用 Virtualbox，發現 kubelet 抓到的 Node IP 相同」之修改方式](#重要提醒使用-virtualbox發現-kubelet-抓到的-node-ip-相同)
 
 ---
-* 準備一個 Kubernetes cluster 做為練習環境
-  * 設定 VM 之間的 ssh 連線
-  * 使用 kubeadm 建立 cluster (STEP 1 ~ 7)
-
-* Bonus Tips (Optional)：
-  * 設定 kubectl bash completion
-  * 加入新的 Worker Node
-  * 在 Worker Node 使用 kubectl
-  * kubeadm 初始化過程中的除錯
-  * 建立 single node cluster
-  * 移除 cluster 中的 Worker Node
-
-* 重要提醒：「使用 Virtualbox，發現 kubelet 抓到的 Node IP 相同」之修改方式。
-
-***
 
 在接下來的章節中，將會有許多範例或練習需要對 cluster 進行操作，所以需要先準備練習用的 cluster，以下提供了兩種方法進行建置：
 
@@ -397,8 +404,8 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 初始化 Master Node 後，目前的 cluster 只存在一個 Node 而已，接下來我們要將 Worker Node 依序加入 cluster 中。
 
 ### STEP 6：加入 Worker Node
-
-> 如果你安裝的是 single node cluster，請直接跳到「*STEP 7：安裝Pod network*」。
+。
+> 如果你安裝的是 single node cluster，請直接跳到「[*STEP 7：安裝Pod network*](#step-7安裝-cni-plugin) 」。
 
 在 Master node 上初始化成功的輸出中，「最下方」有提示該如何加入 Worker Node，我們就直接複製該指令到所有 Worker Node 上執行即可：
 
@@ -487,7 +494,7 @@ kubectl get nodes -w
 ---
 **提醒**
 
-> 如果你建置的是 single node cluster，記得繼續看下面的「Tips 4: Single Node Cluster」。
+> 如果你建置的是 single node cluster，記得繼續看下面的「[Tips 4: Single Node Cluster](#tips-4single-node-cluster)」。
 ***
 
 ### 加入新的 Worker Node
@@ -648,7 +655,7 @@ sudo apt-get purge kubeadm kubectl kubelet kubernetes-cni kube*
 sudo apt-get autoremove
 ```
 
-**重要提醒：使用 Virtualbox，發現 kubelet 抓到的 Node IP 相同**
+## 重要提醒：使用 Virtualbox，發現 kubelet 抓到的 Node IP 相同
 
 如果是使用 Virtualbox 安裝環境，在每台 VM 都有 NAT 網卡的情況下，可能會遇到 kubelet 抓到的 Node 的 INTERNAL-IP  相同的情況，例如：
 ```bash
@@ -726,7 +733,6 @@ node01    Ready    <none>          22d   v1.31.0   192.168.132.2
 
 建置好練習用的 cluster 後，我們明天就來看看 Pod 的相關概念及操作。
 
-> 另外，文章也會在 [Github](https://github.com/michaelchen1225/CKA-note/tree/main) 上同步更新，後續相關的附錄也會放在 Github 上進行補充 ~
 
 ---
 **參考資料**

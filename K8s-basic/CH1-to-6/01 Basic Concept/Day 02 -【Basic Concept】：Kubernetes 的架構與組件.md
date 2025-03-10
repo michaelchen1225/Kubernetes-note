@@ -1,20 +1,20 @@
-### 今日目標
+## 【Basic Concept】：Kubernetes 的架構與組件
 
----
+## 目錄
 
-* Kubernetes 的基本執行單位 --- Pod
+* [基本的執行單位 --- Pod](#基本的執行單位-----Pod)
 
-* Kubernetes 的架構 --- Cluster
+* [Kubernetes 的架構 --- Cluster](#kubernetes-的架構-----cluster)s
 
-* Cluster 的基本硬體單位 --- Node
+* [Cluster 的基本硬體單位 --- Node](#cluster-的基本硬體單位-----node)
 
-  * Node 的必要組件：kubelet、container runtime、kube-proxy
+  * [Master Node 的特殊組件](#master-node-的特殊組件)
 
-  * Node 的角色：Master Node、Worker Node
+* [小結 --- Kubernetes 的架構與組件](#小結-----kubernetes-的架構與組件)
 
-  * Master Node 的特殊組件：kube-apiserver、etcd、kube-scheduler、kube-controller-manager
+* [HA Cluster](#HA-Cluster)
 
-* 了解 HA cluster 的設計方式。
+* [今日小節](#今日小節)
 
 ****
 
@@ -154,6 +154,7 @@ Master Node 身為整個船隊的**總指揮**，除了擁有上述提到的三�
 
    Cluster 各種物件的管理者，是許多控制器(例如: Node-Controller、Replication-Controller)的集合體，透過 kube-apiserver 監控各種資源，並將資源目前的狀態調整至「期望狀態(Desired status)」。例如 「順利執行」是 Pod 的期望狀態，當 controller-manager 透過 kube-apiserver 發現某個 Pod 壞掉時，controller-manager 會負責重新啟動該 Pod，直到它順利執行。
    
+## 小結 --- Kubernetes 的架構與組件
 
 以上就是關於 Node 以及其組件的大致介紹。如果還是覺得有些混亂的話，這裡我們再次用船隊的比喻總結一下：
 
