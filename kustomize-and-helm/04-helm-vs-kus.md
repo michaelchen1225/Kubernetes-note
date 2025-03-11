@@ -91,7 +91,7 @@ kustomize-demo
 兩者的差異性可以體現於：
 
 
-* **角色不同**：Helm 是 package manager，Kustomize 是 configuration management tool。單純使用 Kustomize，無法做到如 Helm 那樣的版本更迭、依賴管理等功能，在專案的分享上也沒有 Helm 方便。
+* **角色不同**：Helm 是 package manager，Kustomize 是 configuration management tool。單純使用 Kustomize，無法做到如 Helm 版本更迭、依賴管理等功能，在專案的分享上也沒有 Helm 方便。
 
 * **語法不同**：Helm 使用 go template，Kustomize 使用 yaml。對於不熟悉 K8s 的人來說，一份註解清晰的 valus.yaml 會使的 Helm 更容易閱讀 & 客製化；而對於熟悉 K8s 的人來說，Kustomize 能直接以 yaml 來描述客製化規則，更加容易閱讀。
 
