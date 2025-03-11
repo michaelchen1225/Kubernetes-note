@@ -4,7 +4,7 @@
 
 * [基本的執行單位 --- Pod](#基本的執行單位-----Pod)
 
-* [Kubernetes 的架構 --- Cluster](#kubernetes-的架構-----cluster)s
+* [Kubernetes 的架構 --- Cluster](#kubernetes-的架構-----cluster)
 
 * [Cluster 的基本硬體單位 --- Node](#cluster-的基本硬體單位-----node)
 
