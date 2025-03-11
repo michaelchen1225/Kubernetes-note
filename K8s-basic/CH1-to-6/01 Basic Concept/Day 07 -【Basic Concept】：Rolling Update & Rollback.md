@@ -2,6 +2,8 @@
 
 ## 目錄
 
+* [ImagePullPolicy](#imagepullpolicy)
+
 * [Update Strategy](#update-strategy)
 
 * [Rolling Update](#rolling-update)
@@ -14,7 +16,31 @@
 
 * [Rollback](#rollback)
 
-在昨天的章節中，我們有提到 Deployment 可以達成 Rolling Update，並且稍微展示了 Update 的效果，也就是更新 image。今天我們來更深入地討論 Rolling update 與 Rollback。
+* [Restart](#restart)
+
+在昨天的章節中，我們有提到 Deployment 可以達成 Rolling Update，並且稍微展示了 Update 的效果，也就是更新 image。今天我們來更深入地討論 Rolling update 與 Rollback。不過在此之前，先來看看 K8s 對於 image 的拉取策略。
+
+### ImagePullPolicy
+
+當一個 Pod 需要 image 時，kubelet 會根據 image 的拉取策略(ImagePullPolicy)來判斷該如何處理：
+
+* **IfNotPresent**：只有當 local 沒有該 image 時才會拉取 (預設值)。
+
+* **Always**：每次都會從 remote registry 查詢最新的 image digest。如果 kubelet 在本地快取中有相同 digest 的 image，則使用快取中的 image；反之則會重新拉取 image 來重啟容器。
+
+  > Image 的 digest 是一個**唯一的 hash 值**，可以確保 image 的唯一性(即使 tag 一樣，但 digest 不同，則代表兩個 image 是不同的)。
+
+* **Never**：只使用本地的 image，不會去 Registry 拉取。
+
+ImagePullPolicy 可以在任何用到 image 的地方指定，例如：
+
+```yaml
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.15
+    imagePullPolicy: Never  # 不指定，預設值為 IfNotPresent
+```
 
 ### Update Strategy
 
@@ -57,7 +83,6 @@ Rolling Updates 可以做到以下幾點：
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: nginx
   name: nginx
@@ -402,6 +427,15 @@ REVISION  CHANGE-CAUSE
 ```bash
 kubectl annotate deployment/nginx kubernetes.io/change-cause="Rollback to first revision"
 ```
+
+### Restart
+
+逐一重啟 Deployment 的所有 Pod：
+
+```bash
+kubectl rollout restart deployment/nginx
+```
+
 
 ### 今日小結
 

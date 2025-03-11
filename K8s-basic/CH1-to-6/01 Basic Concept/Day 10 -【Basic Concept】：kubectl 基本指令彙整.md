@@ -10,6 +10,8 @@
 
 * [常用指令整理：Deployment](#常用指令整理deployment)
 
+* [常用指令整理：Rollout history、Rollback](#常用指令整理rollout-historyrollback)
+
 * [常用指令整理：Service](#常用指令整理service)
 
 * [kubectl 的小技巧](#kubectl-的小技巧)
@@ -222,6 +224,45 @@ kubectl scale deploy <deploy-name> --replicas <new-replicas-number>
 ```bash
 kubectl set image deploy <deploy-name> <container-name>=<new-image-name>
 # 若 Deployment 是由 kubectl create 建立，則 container-name 預設為 deploy-name
+```
+
+### 常用指令整理：Rollout history、Rollback
+
+
+* 查看 Rolling Update 的歷史：
+
+```bash
+kubectl rollout history deploy <deploy-name>
+```
+
+* 查看特定 Revision 的詳細資訊：
+```bash
+kubectl rollout history deploy <deploy-name> --revision=<revision-number>
+```
+
+* 回到上一個版本：
+```bash
+kubectl rollout undo deploy <deploy-name>
+```
+
+* 回到特定 Revision：
+```bash
+kubectl rollout undo deploy <deploy-name> --to-revision=<revision-number>
+```
+
+* 標記此次版本的 CHANGE-CAUSE：
+```bash
+kubectl annotate deploy <deploy-name> kubernetes.io/change-cause="<change-cause>"
+```
+
+* 重啟 Deployment：
+```bash
+kubectl rollout restart deploy <deploy-name>
+```
+
+* 查看 Deployment 的 rolling 狀態：
+```bash
+kubectl rollout status deploy <deploy-name>
 ```
 
 ### 常用指令整理：Service
