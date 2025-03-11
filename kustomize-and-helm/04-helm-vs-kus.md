@@ -1,5 +1,29 @@
 # Helm vs Kustomize
 
+## 目錄
+
+概念複習：
+
+* [Helm](#helm)
+
+* [Kustomize](#kustomize)
+
+Helm vs Kustomize：
+
+* [Helm vs Kustomize](#helm-vs-kustomize-1)
+
+Helm + Kustomize：
+
+* [Why using Helm with Kustomize](#why-using-helm-with-kustomize)
+
+* [Helm + Kustomize 實作](#helm--kustomize-實作)
+  * [準備 Helm Chart](#準備-helm-chart)
+  * [方法 1：helm template + kustomize](#方法-1helm-template--kustomize)
+  * [方法 2：helm install --post-renderer + kustomize](#方法-2helm-install---post-renderer--kustomize)
+  * [補充：helm template --post-renderer + kustomize](#補充helm-template---post-renderer--kustomize)
+
+---
+
 前幾篇文章分別介紹了 helm 與 kustomize，底下簡單複習一下：
 
 ### Helm
@@ -90,25 +114,188 @@ kustomize-demo
 | **易用性** | 完整操作流程，有豐富的 Chart repo，但入門較複雜 | 原生支援 kubectl，對熟悉 kubectl 的人較簡單 |
 | **適用情境** | 適合大規模專案，需要分享與版本管理 | 適合內部專案，熟悉 YAML 的使用者更易上手 |
 
-### Helm + Kustomize
+### Why using Helm with Kustomize
 
-Helm 和 Kustomize 可以幫助您更高效地管理 Kubernetes 應用程式。在某些情境下，您可能會想要同時使用 Helm 和 Kustomize，這些情境包括：
+其實 Helm 與 Kustomize 是可以搭配使用的，搭配方式如下：
 
-當您無法控制 Helm Chart：通常，我們會從 Helm 倉庫拉取並使用他人發布的 Helm Chart。但如果您想修改這些 Chart 內的 YAML 清單（manifests）呢？這時候 Kustomize 可以輕鬆幫助您完成修改。
+> 使用 Helm 產生 YAML，再使用 Kustomize 進行修改。
 
-當需要建立 Secret 和 ConfigMap 資源時：在處理 Secret 和 ConfigMap 時，您通常不希望這些敏感數據直接嵌入 Helm Chart 中。透過 Kustomize，您可以在 Helm 展開（inflate）Chart 之後再建立這些資源。
+會需要這樣搭配的原因有：
 
-當需要同時修改多個資源的欄位時：有時候，您可能需要將所有（或部分）資源強制設定到某個命名空間，或是為這些資源統一添加標籤。這些變更通常不應該直接放進 Helm Chart，但 Kustomize 可以在資源上覆蓋這些設定。
+* 使用者無法控制 Chart：雖然 Helm 可以讓使用者方便的拉取專案，但使用者如果想自行修改、增加內容是無法透過 Helm 完成的。
 
-兩種主要的使用方式
+* 需要建立 Secret、ConfigMap：這些敏感資料不應該直接放在 Helm Chart 中，可以透過 Kustomize 在後續補上。
+
+* 為了使 Helm chart 的通用性，一般不會將統一的 namespace、label 直接寫在 Chart 中，而這可以使用 Kustomize 在部署時設定。
+
+* 若要針對不同部署環境進行微調，同樣可以先用 Helm 生成基本的 YAML，再透過 Kustomize 進行修改。
+
+> 總而言之，當無法直接修改 Chart 或是需要增加設定時，Helm + Kustomize 是一個不錯的選擇。
+
+在實際操作上，Helm + Kustomize 有兩種搭配方式：
+
+1. 使用 `helm template` 生成 YAML 清單，再 Kustomize 進行修改。這種方法無法使用 Helm 的 Release 管理功能。
+2. 使用 `helm install`（或 `helm upgrade --install`），搭配 `--post-renderer` flag 來指定 Kustomize 進行修改。這種方式可以保留 Helm 的 Release 管理功能，同時也能利用 Kustomize 來調整配置。
 
 
-Helm 和 Kustomize 可以透過兩種主要方式結合使用，但這兩種方式不能同時進行：
+### Helm + Kustomize 實作 
 
-* 使用 helm template 生成 YAML 清單，然後使用 Kustomize 進行修改。這種方法的缺點是 Helm 不會管理任何 Release。
-* 使用 helm install（或 helm upgrade --install），並在應用到叢集之前使用 Kustomize 修改 YAML 清單。這種方式可以保留 Helm 的 Release 管理功能，同時也能利用 Kustomize 來調整配置。
+#### 準備 Helm Chart
 
-核心要點
-Kustomize 和 Helm 都是強大的 Kubernetes 應用管理工具，雖然它們目標相似，但解決問題的方式不同。
-這兩者並不是互相競爭的工具，而是可以搭配使用，以提供更靈活的 Kubernetes 部署方式。
-您還可以了解 Spacelift 如何幫助管理 Kubernetes 的複雜性和合規性。Spacelift 的 Kubernetes 支援是基於 Kustomize，並與 kubectl 提供原生整合。
+* 初始化一個 Helm Chart：
+
+```bash
+DEMO_HOME=$(mktemp -d)
+helm create $DEMO_HOME/helm-demo
+cd $DEMO_HOME/helm-demo
+```
+
+* 先清空 templates 目錄：
+
+```bash
+rm -rf templates/*
+```
+
+* 撰寫 Chart.yaml：
+
+```bash
+cat <<EOF > Chart.yaml
+apiVersion: v2
+name: helm-demo
+description: helm-with-kustomize
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+EOF
+```
+
+* 創建一個 Pod 作為 template：
+
+```bash
+cat <<EOF > templates/pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: "{{ .Values.image.name }}"
+EOF
+```
+
+* 撰寫 values.yaml：
+
+```bash
+cat <<EOF > values.yaml
+image:
+  name: nginx
+EOF
+```
+
+* 驗證 Helm Chart 是否正確：
+
+```bash
+helm template . --values values.yaml
+```
+
+#### 方法 1：helm template + kustomize
+
+OK，現在我們已經有一個簡單的 Helm Chart 了。不過這個 Chart 無法讓使用者客製化 image tag，以下用 Kustomize 來解決這個問題：
+
+* 新增一個給 kustomize 的目錄：
+
+```bash
+mkdir $DEMO_HOME/kustomize-demo
+cd $DEMO_HOME/kustomize-demo
+```
+
+* 撰寫 kustomization.yaml：
+
+```bash
+cat <<EOF > kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - resources.yaml 
+
+images:
+  - name: nginx
+    newTag: 1.19.2
+EOF
+```
+
+* 先測試看看 `helm template + kustomize` 的效果：
+
+```bash
+# 在 kustomize-demo 目錄
+helm template $DEMO_HOME/helm-demo --values $DEMO_HOME/helm-demo/values.yaml > resources.yaml
+kubectl kustomize .
+```
+
+> image tag 已被修改成 1.19.2。
+
+#### 方法 2：helm install --post-renderer + kustomize
+
+另外一種方式是在 Helm 中使用 `--post-renderer`，這個 option 會附帶一個可執行檔，在 Helm 正式發布 release 前會先執行這個檔案，對 YAML 進行預渲染：
+
+* 撰寫可執行檔 `kustomize.sh`：
+
+```bash
+cat <<EOF > kustomize.sh
+#!/bin/bash
+cat > resources.yaml
+kubectl kustomize .
+EOF
+```
+
+* 給 `kustomize.sh` 執行權限：
+
+```bash
+chmod u+x kustomize.sh
+```
+
+* 使用 `helm install` 並指定 `--post-renderer`：
+
+```bash
+helm install helm-demo $DEMO_HOME/helm-demo --values $DEMO_HOME/helm-demo/values.yaml --post-renderer $DEMO_HOME/kustomize-demo/kustomize.sh
+```
+
+> 在這個指令中，helm install 會先將原本的 YAML 丟給 kustomize.sh 處理，而 kustomize.sh 裡的 `cat > resources.yaml` 負責產生 resources.yaml，再透過 `kubectl kustomize .` 進行修改，最終執行 helm install。
+
+* 現在就可以用 `helm list` 查看 release 了：
+
+```bash
+helm list
+```
+```plaintext
+root@ubuntu:/tmp/tmp.NuKfekzVqi/kustomize-demo# helm list
+NAME                           	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART                                 	APP VERSION
+helm-demo                      	default  	1       	2025-03-11 10:59:48.691947904 +0800 CST	deployed	helm-demo-0.1.0                       	1.0.0   
+```
+
+* 確認 Pod 的 image tag 是否正確：
+
+```bash
+kubectl get pod nginx -o jsonpath='{.spec.containers[0].image}'
+```
+```plaintext
+nginx:1.19.2
+```
+
+#### 補充：helm template --post-renderer + kustomize
+
+helm template 也可以使用 `--post-renderer` 來產生 YAML：
+
+```bash
+helm template $DEMO_HOME/helm-demo --values $DEMO_HOME/helm-demo/values.yaml --post-renderer $DEMO_HOME/kustomize-demo/kustomize.sh
+```
+
+### 總結
+
+在專案越來越龐大的時候，Helm 可以用一份 values.yaml 讓使用者快速客製化，如果客製化內容並沒有定義在 values.yaml 中，那麼就可以透過 Kustomize 來進行修改。
+
+### Reference
+
+* [When and How to Use Helm and Kustomize Together](https://trstringer.com/helm-kustomize/)
