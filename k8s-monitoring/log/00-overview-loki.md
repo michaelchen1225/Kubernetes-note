@@ -25,9 +25,7 @@ Loki 只收集 log 的 metadata 並做成 index (timestamp + label)，而非 ind
 
 ![alt text](image.png)
 
-https://www.reddit.com/r/grafana/comments/15e9aej/help_setting_up_grafana_prometheus_and_loki_stack/
 
-https://www.civo.com/learn/advanced-kubernetes-monitoring
 
 ### Loki architecture
 
@@ -86,3 +84,8 @@ https://www.civo.com/learn/advanced-kubernetes-monitoring
 
 ```bash
 
+https://www.reddit.com/r/grafana/comments/15e9aej/help_setting_up_grafana_prometheus_and_loki_stack/
+
+https://www.civo.com/learn/advanced-kubernetes-monitoring
+
+https://www.youtube.com/watch?v=Mn2YpMJaEBY&t=466s
