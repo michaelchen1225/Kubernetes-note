@@ -115,7 +115,7 @@ ssh-keygen
 # 一直按 Enter 即可
 ```
 
-* 修改 /etc/ssh/sshd_config，將 PermitRootLogin 設定為 yes，允許 clinnt 用 root 連進來：
+* 修改 /etc/ssh/sshd_config，將 PermitRootLogin 設定為 yes，允許 client 用 root 連進來：
 > 如果找不到 PermitRootLogin，直接新增這行即可。
 ```bash
 # /etc/ssh/sshd_config：

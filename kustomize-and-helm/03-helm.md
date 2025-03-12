@@ -387,6 +387,11 @@ helm repo add <repo-name> <repo-url>
 helm install <release-name> <repo-name>/<chart-name>
 ```
 
+* 安裝前如果想先確認該 chart 的 values.yaml，可以使用 `helm show values`：
+```bash
+helm show values <repo-name>/<chart-name>
+```
+
 * 如果來源 repo 有釋出更新，我們在更新之前，必須先更新來源 repo 的狀態：
 ```bash
 helm repo update
@@ -402,6 +407,8 @@ helm repo list
 ```bash
 helm repo remove <repo-name>
 ```
+
+
 
 
 ### 建立自己的 helm chart repository：以 Gitlab 為例

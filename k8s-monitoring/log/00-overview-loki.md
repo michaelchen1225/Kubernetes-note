@@ -31,44 +31,7 @@ Loki 只收集 log 的 metadata 並做成 index (timestamp + label)，而非 ind
 
 ![alt text](image-2.png)
 
-**Write Path**：
-
-1. **Distributor**接收包含 log streams）和 log line 的 HTTP POST 請求。 
-
-2. Distributor 會對請求中的每個 log 流進行 hash運算，以確定應將其發送到哪個 **Ingester**，這是根據 **consistent hash ring** 來決定的。 
-
-3. Distributor 將每個 log stream 發送到適當的 **Ingester**。
-
-4. Ingester 接收 log stream 和 log line，並為該日誌流的數據創建 **chunk**，或將數據追加到現有的 **chunk**。
-
-5. Ingester 確認寫入成功。  
-
-6. Distributor 會等待大多數 **Ingester** 確認其寫入操作。
-
-7. 如果 Distributor 至少收到 N/2 + 1 的確認，則返回 **成功（2xx 狀態碼）**，否則，如果寫入操作失敗，則返回 **錯誤（4xx 或 5xx 狀態碼）**。  
-
-
----  
-
-**Read Path**：
-
-1. **Query Frontend** 接收包含 **LogQL 查詢** 的 HTTP GET 請求。
-
-2. Query Frontend 將查詢拆分成 **子查詢（sub-queries）**，並將其傳遞給 **Query Scheduler（查詢調度器）**。  
-
-3. **Querier（查詢器）** 從 **Query Scheduler** 拉取子查詢。  
-
-4. Querier 將查詢傳遞給所有 **Ingester**，以獲取記憶體中的數據。  
-
-5. **Ingester** 返回與查詢匹配的記憶體數據（如果有的話）。  
-
-6. 如果 **Ingester** 沒有 or 返回的數據不足，**Querier** 會從 **後端存儲（backing store）** 延遲加載數據，並對其執行查詢。  
-
-7. Querier 遍歷所有收到的數據，進行 **deduplication**，然後將子查詢結果返回給 **Query Frontend**。  
-
-8. Query Frontend 等待所有子查詢的結果，然後由 **Querier** 返回最終結果。  
-
-9. Query Frontend 合併所有子查詢的結果，生成最終結果並返回給客戶端。  
+> Offical document: (https://grafana.com/docs/loki/latest/get-started/architecture/)
 
 ## PLG stack
 
@@ -80,9 +43,7 @@ Loki 只收集 log 的 metadata 並做成 index (timestamp + label)，而非 ind
 
 * Grafana：提供使用者查詢、觀察 log 的 UI。
 
-### Install Loki stack
 
-```bash
 
 https://www.reddit.com/r/grafana/comments/15e9aej/help_setting_up_grafana_prometheus_and_loki_stack/
 
