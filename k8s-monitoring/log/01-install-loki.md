@@ -2,13 +2,19 @@
 
 ## Install kube-prometheus-stack
 
+* 下載所需的 values.yaml：
+
+```
+git clone https://github.com/michaelchen1225/monitoring-values.git /tmp/monitoring-values
+```
+
 ```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 ```
 
 ```
-helm upgrade --install -f  /tmp/values-yaml/prom-values.yaml prom prometheus-community/kube-prometheus-stack -n monitoring
+helm upgrade --install -f /tmp/monitoring-values/prom-values.yaml prom prometheus-community/kube-prometheus-stack -n monitoring
 ```
 
 ```
@@ -48,5 +54,5 @@ helm upgrade --install loki grafana/loki-distributed -n monitoring
 ```
 
 ```
-helm upgrade --install -f /tmp/values-yaml/promtail-values.yaml promtail grafana/promtail -n monitoring
+helm upgrade --install -f /tmp/monitoring-values/promtail-values.yaml promtail grafana/promtail -n monitoring
 ```
