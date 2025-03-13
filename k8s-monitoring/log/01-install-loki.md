@@ -135,7 +135,14 @@ kubectl get secret prom-grafana -n monitoring -o jsonpath="{.data.admin-password
 ```
 
 
+* 左邊 sidebar 選擇 `Connection` -> `Data Sources`，進入三個 Data Source 並選擇下方的 `Test`：
+
+> 應該要看到「Health check passed」：
+
+![alt text](image-3.png)
+
 
 
 ref:
+
 https://medium.com/israeli-tech-radar/how-to-create-a-monitoring-stack-using-kube-prometheus-stack-part-1-eff8bf7ba9a9
