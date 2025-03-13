@@ -8,13 +8,13 @@
 
 只要將資料來源設定好，之後就可以統一用 Grafana 來觀察 Metrics 與 Logs。
 
-### Step 1：準備需要的 Namespace (Optional)
+#### Step 1：準備需要的 Namespace (Optional)
 
 ```bash
 test -n "$(kubectl get ns monitoring)" || kubectl create ns monitoring
 ```
 
-### Step 2：準備需要的 values.yaml
+#### Step 2：準備需要的 values.yaml
 
 ```bash
 # values for kube-prometheus-stack
@@ -57,7 +57,7 @@ config:
 ```
 
 
-### Step 3：安裝 kube-prometheus-stack
+#### Step 3：安裝 kube-prometheus-stack
 
 
 * 加入所需的 Helm Repo：
@@ -74,7 +74,7 @@ helm repo update
 helm upgrade --install -f ~/prom-values.yaml prom prometheus-community/kube-prometheus-stack -n monitoring
 ```
 
-### Step 4：Expose Grafana
+#### Step 4：Expose Grafana
 
 以下有兩個選擇來 expose Grafana：
 
@@ -91,7 +91,7 @@ kubectl -n monitoring edit svc prom-grafana
 kubectl -n monitoring port-forward svc/prom-grafana 3001:80
 ```
 
-### Step 5：安裝 Loki & Promtail
+#### Step 5：安裝 Loki & Promtail
 
 * 加入所需的 Helm Repo：
 
@@ -111,7 +111,7 @@ helm upgrade --install -f ~/promtail-values.yaml promtail grafana/promtail -n mo
 helm upgrade --install loki grafana/loki-distributed -n monitoring
 ```
 
-## Final Step：登入 Grafana
+#### Final Step：登入 Grafana
 
 登入 Grafana，確認 Data Source 設定是能正確連線：
 
