@@ -22,6 +22,7 @@ test "$(kubectl get ns monitoring 2> /dev/null)" || kubectl create ns monitoring
 # values for kube-prometheus-stack
 cat <<EOF > ~/prom-values.yaml
 grafana:
+  defaultDashboardsTimezone: Asia/Taipei
   adminPassword: Uj%c4fxF2xsXL*
   additionalDataSources:
     - name: Loki

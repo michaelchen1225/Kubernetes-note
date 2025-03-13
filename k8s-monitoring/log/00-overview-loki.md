@@ -43,6 +43,8 @@ Loki 只收集 log 的 metadata 並做成 index (timestamp + label)，而非 ind
 
 * Grafana：提供使用者查詢、觀察 log 的 UI。
 
+> [安裝步驟](./01-install-loki.md)
+
 
 
 https://www.reddit.com/r/grafana/comments/15e9aej/help_setting_up_grafana_prometheus_and_loki_stack/
