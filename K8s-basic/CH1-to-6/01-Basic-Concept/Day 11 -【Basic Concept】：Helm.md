@@ -1,19 +1,22 @@
-### 今日目標
+# Helm
 
-* 了解 Helm 的用途與架構
+### 目錄
 
-* 安裝 Helm
+* [什麼是 Helm？](#什麼是-helm)
 
-* Helm 的實作
-  * 建立 Chart
-  * 透過 Chart 部署應用服務
-  * 更新 Chart
+* [安裝 Helm](#安裝-helm)
 
-* 部署他人分享的 Chart
+* [Helm 的實作](#helm-的實作建立並部署第一個-chart)
 
-* 建立自己的 helm chart repository：以 Gitlab 為例
+* [修改 Helm 的 value 設定](#修改-helm-的-value-設定)
 
-* Helm 的常用指令彙整
+* [打包 Chart 並分享](#打包-chart-並分享)
+
+* [部署他人分享的 Chart](#部署他人分享的-chart)
+
+* [建立自己的 helm chart repository：以 Gitlab 為例](#建立自己的-helm-chart-repository以-gitlab-為例)
+
+* [Helm 的常用指令彙整](#helm-的基本指令彙整)
 
 ### 什麼是 Helm？
 
@@ -75,7 +78,8 @@ git clone https://github.com/michaelchen1225/helm-demo.git
 cd ./helm-demo
 ```
 
-此目錄就是一個可用的 Helm chart，我們先看一下這個 Helm chart 的基本目錄結構：
+此目錄就是一個 Helm chart 的基本專案結構：
+
 ```text
 helm-demo
 |-- Chart.yaml
@@ -86,6 +90,7 @@ helm-demo
 |   |-- NOTES.txt
 |-- values.yaml
 ```
+
 * **Chart.yaml**：用來描述該 chart 的基本資訊，例如 chart 的名稱、版本、描述等。
 * **charts**：放置「子 chart」的目錄，通常有相依性的 chart 會放在這裡，這個目錄預設是空的。
 * **templates**: 放置 k8s 資源 yaml 的目錄，以下為我們自行添加的 yaml：
@@ -383,6 +388,11 @@ helm repo add <repo-name> <repo-url>
 helm install <release-name> <repo-name>/<chart-name>
 ```
 
+* 安裝前如果想先確認該 chart 的 values.yaml，可以使用 `helm show values`：
+```bash
+helm show values <repo-name>/<chart-name>
+```
+
 * 如果來源 repo 有釋出更新，我們在更新之前，必須先更新來源 repo 的狀態：
 ```bash
 helm repo update
@@ -398,6 +408,8 @@ helm repo list
 ```bash
 helm repo remove <repo-name>
 ```
+
+
 
 
 ### 建立自己的 helm chart repository：以 Gitlab 為例
@@ -533,7 +545,7 @@ helm lint <chart-path>
 
 查看 chart 的 template 是否符合預期：
 ```bash
-helm template <chart-path>
+helm template <chart-path> -f <values.yaml>
 ```
 
 安裝 Chart：
@@ -541,10 +553,21 @@ helm template <chart-path>
 helm install <release-name> <chart-name>
 ```
 
+僅檢查安裝 Chart 是否能成功，但並不是真的安裝：
+```bash
+helm install <release-name> <chart-name> --dry-run
+```
+
 從特定 repo 安裝 Chart：
 ```bash
 helm install <release-name> <repo-name>/<chart-name>
 ```
+
+安裝前先看看 chart-name 會部署哪些 yaml：
+```bash
+helm template <repo-name>/<chart-name> -f <values.yaml>
+```
+
 
 安裝 Chart 並修改 value：
 ```bash
@@ -651,4 +674,3 @@ helm repo remove <repo-name>
 * [Helm Charts Tutorial: A Simple Guide for Beginners](https://devopscube.com/create-helm-chart/)
 
 * [Get started with GitLab's Helm Package Registry](https://about.gitlab.com/blog/2021/10/18/improve-cd-workflows-helm-chart-registry/)
-
