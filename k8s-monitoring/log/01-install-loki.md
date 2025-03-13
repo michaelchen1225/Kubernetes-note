@@ -11,7 +11,7 @@
 #### Step 1：準備需要的 Namespace (Optional)
 
 ```bash
-test -n "$(kubectl get ns monitoring)" || kubectl create ns monitoring
+test "$(kubectl get ns monitoring 2> /dev/null)" || kubectl create ns monitoring
 ```
 
 #### Step 2：準備需要的 values.yaml
