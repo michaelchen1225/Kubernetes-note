@@ -8,6 +8,8 @@
 
 只要將資料來源設定好，之後就可以統一用 Grafana 來觀察 Metrics 與 Logs。
 
+---
+
 #### Step 1：準備需要的 Namespace (Optional)
 
 ```bash
@@ -54,6 +56,7 @@ cat <<EOF > ~/promtail-values.yaml
 config:
   clients:
     - url: http://loki-loki-distributed-gateway.monitoring.svc.cluster.local/loki/api/v1/push
+EOF
 ```
 
 
