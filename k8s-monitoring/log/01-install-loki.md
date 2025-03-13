@@ -122,7 +122,11 @@ helm upgrade --install loki grafana/loki-distributed -n monitoring
 
 > 若使用 port-forward，則透過瀏覽器連線到 `http://localhost:3001`
 
-* Username：admin
+* Username：
+
+```bash
+kubectl get secret prom-grafana -n monitoring -o jsonpath="{.data.admin-user}" | base64 --decode ; echo
+```
 
 * Password：
 
