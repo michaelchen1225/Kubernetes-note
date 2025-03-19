@@ -143,6 +143,54 @@ kubectl get secret prom-grafana -n monitoring -o jsonpath="{.data.admin-password
 ![alt text](image-3.png)
 
 
+## 新增 exporter
+
+```bash
+helm install my-release oci://ghcr.io/deliveryhero/helm-charts/prometheus-k8s-events-exporter -n monitoring
+```
+
+添加 service port name:
+
+```bash
+k edit svc -n monitoring my-release-prometheus-k8s-events-exporter
+```
+
+```yaml
+  ports:
+  - name: event
+    port: 9102
+    protocol: TCP
+    targetPort: 9102
+```
+
+添加 serviceMonitor:
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: event-monitoring
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-k8s-events-exporter 
+spec:
+  endpoints:
+  - interval: 15s
+    path: /metrics # 在 kube-event-exporter 的 github 網站有提到
+    port: event # port name 指向 9102
+  namespaceSelector:
+    matchNames:
+      - monitoring  # exporter svc 所在的 namespace
+  selector:
+    matchLabels:
+       helm.sh/chart: prometheus-k8s-events-exporter-0.2.2 # exporter svc 的 label
+```
+
+apply 之後進入 prometheus，點 target health，應該可以看到：
+
+![alt text](image-4.png)
+
+> 可能要稍微等一下
 
 ref:
 
