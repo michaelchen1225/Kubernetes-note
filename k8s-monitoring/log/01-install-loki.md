@@ -195,3 +195,5 @@ apply 之後進入 prometheus，點 target health，應該可以看到：
 ref:
 
 https://medium.com/israeli-tech-radar/how-to-create-a-monitoring-stack-using-kube-prometheus-stack-part-1-eff8bf7ba9a9
+
+https://help.aliyun.com/zh/prometheus/use-cases/use-servicemonitors-to-discover-and-monitor-services
