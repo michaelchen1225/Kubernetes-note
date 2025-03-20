@@ -138,7 +138,7 @@ kustomize-demo
 2. 使用 `helm install`（或 `helm upgrade --install`），搭配 `--post-renderer` flag 來指定 Kustomize 進行修改。這種方式可以保留 Helm 的 Release 管理功能，同時也能利用 Kustomize 來調整配置。
 
 
-### Helm + Kustomize 實作 
+### Helm + Kustomize 
 
 #### 準備 Helm Chart
 
@@ -291,6 +291,9 @@ helm template 也可以使用 `--post-renderer` 來產生 YAML：
 ```bash
 helm template $DEMO_HOME/helm-demo --values $DEMO_HOME/helm-demo/values.yaml --post-renderer $DEMO_HOME/kustomize-demo/kustomize.sh
 ```
+
+> 雖然以上只是簡單的替換 image tag，但上述兩種方式即使在更複雜的設定也同樣可用。
+
 
 ### 總結
 

@@ -139,7 +139,7 @@ Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administr
 | Day 08 |[Namespace](CH1-to-6/01-Basic-Concept/Day%2008%20-【Basic%20Concept】：Namespace.md)
 | Day 09 |[Service](CH1-to-6/01-Basic-Concept/Day%2009%20-【Basic%20Concept】：Service.md)
 | Day 10 |[kubectl 基本操作彙整](CH1-to-6/01-Basic-Concept/Day%2010%20-【Basic%20Concept】：kubectl%20基本指令彙整.md)
-| Day 11 |[*專案的打包與部署 --- Helm](CH1-to-6/01-Basic-Concept/Day%2011%20-【Basic%20Concept】：Helm.md)
+| Day 11 |[專案的打包與部署 --- Helm](CH1-to-6/01-Basic-Concept/Day%2011%20-【Basic%20Concept】：Helm.md)
 
 2. **Storage**：
 
