@@ -124,8 +124,6 @@ Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administr
 
 ### 章節規劃
 
-> 註：「*」為 *CKA Optional*，如果是專攻 CKA 的讀者，可以先跳過這個部分，後面有興趣再回來看(例如 helm)。
-
 1. **Basic concept**：
 
 | 天數 | 主題|
