@@ -145,7 +145,7 @@ Kubernetes 算是一個超級深水區，考過「Certified Kubernetes Administr
 | --- | --- |
 | Day 12 |[ConfigMap & Secret](CH1-to-6/02-Storage/Day%2012%20-【Storage】：ConfigMap%20&%20Secret.md)
 | Day 13 |[Volume 的三種基本應用 --- emptyDir、hostPath、configMap & secret](CH1-to-6/02-Storage/Day%2013%20-【Storage】：Volume%20的三種基本應用%20---%20emptyDir、hostPath、configMap%20&%20secret.md)
-| Day 14 |[PV、PVC & StorageClass](CH1-to-6/02-Storage/Day%2014%20-【Storage】：PV、PVC%20&%20StorageClass.md)
+| Day 14 |[PV、PVC & StorageClass](CH1-to-6/02-Storage/Day%2014%20-【Storage】：%20PV、PVC%20&%20StorageClass.md)
 
 
 3. **Workloads & Scheduling**：
