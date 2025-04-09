@@ -408,6 +408,13 @@ helm repo list
 helm repo remove <repo-name>
 ```
 
+* 在已經加入的 repository 中以關鍵字搜尋 Chart：
+
+```bash
+helm search repo <key-words>
+```
+
+
 
 
 
@@ -658,6 +665,12 @@ helm repo list
 移除 repo：
 ```bash
 helm repo remove <repo-name>
+```
+
+在已經加入的 repository 中以關鍵字搜尋 Chart：
+
+```bash
+helm search repo <key-words>
 ```
 
 ### 今日小結
