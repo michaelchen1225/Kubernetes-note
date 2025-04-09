@@ -567,6 +567,12 @@ helm install <release-name> <repo-name>/<chart-name>
 helm template <repo-name>/<chart-name> -f <values.yaml>
 ```
 
+取得 Chart 的 value：
+
+```bash
+helm show value <repo-name>/<chart-name>
+```
+
 
 安裝 Chart 並修改 value：
 ```bash
