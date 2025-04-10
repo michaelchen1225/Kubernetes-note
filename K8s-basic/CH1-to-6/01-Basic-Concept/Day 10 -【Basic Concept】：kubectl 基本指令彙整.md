@@ -16,7 +16,9 @@
 
 * [kubectl 的小技巧](#kubectl-的小技巧)
 
-* [修改現有物件：kubectl edit](#修改現有的物件kubectl-edit)
+* [修改現有物件(一)：kubectl edit](#修改現有的物件一kubectl-edit)
+
+* [修改現有物件(二)：kubectl patch](#修改現有的物件二kubectl-patch)
 
 
 
@@ -316,7 +318,7 @@ kubectl replace -f <new-yaml-file> --force --grace-period=0
 
 5. 將 kubectl 設定 alias 為「k」，並且善用 bash 的自動補全功能(Tab 鍵)，能大大提升下指令的速度。相關設定請參考 [Day 03](https://ithelp.ithome.com.tw/articles/10345660) 的「Tips 1：kubectl bash completion」。
 
-### 修改現有的物件：kubectl edit
+### 修改現有的物件(一)：kubectl edit
 
 如果某個資源已經被建立了，但是想要修改一些設定，可以使用 kubectl edit 來進行更新，其語法如下：
 
@@ -464,12 +466,47 @@ kubectl describe po nginx | grep -i cpu
 
 當修改的經驗多了之後，你就會知道哪些欄位可直接用 edit 修改的，而哪些不行。如果你知道你要修改的欄位不能直接用 edit 更新，可以先將資源的 yaml 輸出，修改新 yaml 後再用 replace 來取代：
 
+
 ```bash
 kubectl get <resource_type> <resource_name> -o yaml > /tmp/<resource_name>.yaml
 ```
 (這樣可以節省掉因為 kubectl edit 失敗而要再次退出文字編輯器的時間，以及複製 /tmp/kubectl-edit-xxx 的步驟)
 
 > 最後要提醒的是，以版本控制的角度來說，頻繁使用 kubectl edit 來修改資源可能會造成資源的版控不易追蹤，因為 edit 後的結果並不會反映到原始的 yaml 檔案中，這點須特別留意。
+
+### 修改現有的物件(二)：kubectl patch
+
+另外我們也能透過 `kubectl patch` 來直接修改特定的欄位，而不用經過文字編輯器：
+
+**語法**
+
+```bash
+kubectl patch <resource_type> <resource_name> -p <json-patch>
+```
+
+舉例來說，我想更新 Pod 的 image 為 nginx:1.19.1，可以這樣做：
+
+* 建立一個 Pod：
+
+```bash
+kubectl run nginx --image nginx
+```
+
+* 使用 kubectl patch 更新 image：
+
+```bash
+kubectl patch po nginx -p '{"spec":{"containers":[{"name":"nginx","image":"nginx:1.19.1"}]}}'
+```
+
+* 另外，也可以加上 `--dry-run=client -o yaml` 先預覽一下：
+
+```bash
+kubectl patch po nginx -p '{"spec":{"containers":[{"name":"nginx","image":"nginx:1.19.1"}]}}' --dry-run=client -o yaml
+```
+
+
+`kubectl patch` 比較常用在腳本、自動化流程等「無法使用文字編輯器」的情況，因為當你手動把 json patch 打出來時，`kubectl edit` 說不定早就改好了。
+
 
 ### 今日小結
 
