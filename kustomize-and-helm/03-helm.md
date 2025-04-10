@@ -408,6 +408,13 @@ helm repo list
 helm repo remove <repo-name>
 ```
 
+* 在已經加入的 repository 中以關鍵字搜尋 Chart：
+
+```bash
+helm search repo <key-words>
+```
+
+
 
 
 
@@ -567,6 +574,12 @@ helm install <release-name> <repo-name>/<chart-name>
 helm template <repo-name>/<chart-name> -f <values.yaml>
 ```
 
+取得 Chart 的 value：
+
+```bash
+helm show value <repo-name>/<chart-name>
+```
+
 
 安裝 Chart 並修改 value：
 ```bash
@@ -652,6 +665,12 @@ helm repo list
 移除 repo：
 ```bash
 helm repo remove <repo-name>
+```
+
+在已經加入的 repository 中以關鍵字搜尋 Chart：
+
+```bash
+helm search repo <key-words>
 ```
 
 ### 今日小結
