@@ -90,7 +90,6 @@ helm-demo
 |   |-- NOTES.txt
 |-- values.yaml
 ```
-
 * **Chart.yaml**：用來描述該 chart 的基本資訊，例如 chart 的名稱、版本、描述等。
 * **charts**：放置「子 chart」的目錄，通常有相依性的 chart 會放在這裡，這個目錄預設是空的。
 * **templates**: 放置 k8s 資源 yaml 的目錄，以下為我們自行添加的 yaml：
@@ -409,6 +408,13 @@ helm repo list
 helm repo remove <repo-name>
 ```
 
+* 在已經加入的 repository 中以關鍵字搜尋 Chart：
+
+```bash
+helm search repo <key-words>
+```
+
+
 
 
 
@@ -568,6 +574,12 @@ helm install <release-name> <repo-name>/<chart-name>
 helm template <repo-name>/<chart-name> -f <values.yaml>
 ```
 
+取得 Chart 的 value：
+
+```bash
+helm show value <repo-name>/<chart-name>
+```
+
 
 安裝 Chart 並修改 value：
 ```bash
@@ -653,6 +665,12 @@ helm repo list
 移除 repo：
 ```bash
 helm repo remove <repo-name>
+```
+
+在已經加入的 repository 中以關鍵字搜尋 Chart：
+
+```bash
+helm search repo <key-words>
 ```
 
 ### 今日小結
