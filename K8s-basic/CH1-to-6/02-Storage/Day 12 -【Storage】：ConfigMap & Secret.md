@@ -42,7 +42,7 @@ containers:
 
 這時候就可以使用 configMap 和 secret 來達成這個目的。除了環境變數外， configMap 和 secret 也可以用來設定「command-line 參數」、存放「檔案」等等。
 
-(configMap 與 secret 可以和 volumn 搭配使用，不過這部分會等到下一篇介紹 Volume 時再提到)
+(configMap 與 secret 可以和 volumn 搭配使用，這部分會等到下一篇介紹 Volume 時再提到)
 
 ### ConfigMap
 

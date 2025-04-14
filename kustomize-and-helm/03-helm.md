@@ -577,7 +577,7 @@ helm template <repo-name>/<chart-name> -f <values.yaml>
 取得 Chart 的 value：
 
 ```bash
-helm show value <repo-name>/<chart-name>
+helm show values <repo-name>/<chart-name>
 ```
 
 
