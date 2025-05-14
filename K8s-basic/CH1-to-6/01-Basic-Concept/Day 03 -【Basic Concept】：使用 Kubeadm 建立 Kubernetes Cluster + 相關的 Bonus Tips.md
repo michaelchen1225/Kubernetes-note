@@ -144,6 +144,16 @@ ssh root@192.168.132.2
 ssh root@worker1
 ```
 
+如果不想每次都輸入密碼驗證，還可以用 `ssh-copy-id` 將 ssh key 複製到目標 node 上：
+
+```bash
+# 將 ssh key 複製到 worker1 上
+ssh-copy-id root@worker1
+```
+
+> 下完指令後，會要求輸入密碼驗證，若驗證成功，以後登入 worker1 直接 `ssh root@worker1` 即可。
+
+
 安裝好虛擬機、設定好 IP 與 ssh 連線後，就可以開始 cluster 的建置了。
 
 ---
