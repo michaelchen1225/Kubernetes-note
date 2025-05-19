@@ -39,7 +39,7 @@
 
 ### 一、Load balancing master node
 
-我們知道 kube-apiserver 是 master node 上的重要組件，任何訊息的傳遞都得經過 kube-apiserver。而在 HA cluster 的架構下有多台 master，也就意味著有多個 kube-apiserver，這時候就需要一個負載平衡器 (Load Balancer) 來將請求分配到不同的 kube-apiserver 上。
+我們知道 kube-apiserver 是 master node 上的重要組件，任何訊息的傳遞都得經過 kube-apiserver。在 HA cluster 的架構下有多台 master，也就意味著有多個 kube-apiserver，這時候就需要一個負載平衡器 (Load Balancer) 來將請求分配到不同的 kube-apiserver 上。
 
 在這次的建置中，會使用 `HAPrxoy` + `Keepalived` 的組合來實現 load balancing master node 的功能，運作方式如下：
 
