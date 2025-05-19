@@ -58,7 +58,7 @@
 
 你可以用任意的平台來模擬出多個 VM，用來建置 HA cluster。VM 的數量可依需求調整：
 
-* 一台 VM 作為跳板機 (bastion)，日後我們不會直接到 master node 上操作 kubectl 等指令，而是會透過跳板機來操作。
+* 1 台 VM 作為跳板機 (bastion)：日後我們不會直接到 master node 上操作 kubectl 等指令，而是會透過跳板機來操作。
 
 * **至少** 3 台 VM 作為 master node
 
