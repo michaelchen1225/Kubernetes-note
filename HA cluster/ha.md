@@ -1,5 +1,32 @@
 # 建置 HA cluster
 
+## 目錄
+
+* [HA cluster 概述](#ha-cluster-概述)
+
+* [規劃 HA cluster](#規劃-ha-cluster)
+  * [一、Load balancing master node](#一load-balancing-master-node)
+  * [二、Infrastructure](#二infrastructure)
+  * [三、Container Runtime & CNI](#三container-runtime--cni)
+
+* [建置 HA cluster](#建置-ha-cluster)
+  * [Step 1：建置 VM & 設定 IP](#step-1建置-vm--設定-ip)
+  * [Step 2：安裝 SSH](#step-2安裝-ssh)
+  * [Step 3：設定跳板機 (bastion)](#step-3設定跳板機-bastion)
+  * [Step 4：設定 haproxy server & keepalived](#step-4設定-haproxy-server--keepalived)
+  * [Step 5：檢查 keepalived 是否正常運作](#step-5檢查-keepalived-是否正常運作)
+  * [Step 6：安裝 & 設定 Container Runtime](#step-6安裝--設定-container-runtime)
+  * [Step 7：啟用必要模組 & 關閉 swap](#step-7啟用必要模組--關閉-swap)
+  * [Step 8：安裝 kubeadm、kubelet、kubectl](#step-8安裝-kubeadmkubeletkubectl)
+  * [Step 9：初始化 Master node](#step-9初始化-master-node)
+  * [Step 10：安裝 CNI](#step-10安裝-cni)
+  * [Step 11：加入其他 Master node](#step-11加入其他-master-node)
+  * [Step 12：加入 Worker node](#step-12加入-worker-node)
+  * [Step 13：檢查 HA cluster](#step-13設定-bastion-的-kubectl)
+
+
+
+
 ## HA cluster 概述
 
 若 k8s cluster 中只有一個 master node (controlplane)，當 master 發生單點故障時將會導致 cluster 無法正常運做，因此在實務上會將 master node 的數量設定為 3 或 5 個，而這樣的 cluster 就稱為 HA cluster (High Availability Cluster)。
@@ -150,7 +177,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   ssh haproxy-1
   ```
 
-### Step 3：設定 haproxy server & keepalived
+### Step 4：設定 haproxy server & keepalived
 
 > 在 **haproxy-1** 與 **haproxy-2** 上進行以下操作：
 
@@ -373,7 +400,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   sudo systemctl enable keepalived
   ```
 
-### Step 4：檢查 keepalived 是否正常運作
+### Step 5：檢查 keepalived 是否正常運作
 
 * 首先，在 bastion 上檢查 VIP 對應的網卡卡號：
 
@@ -446,7 +473,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   sudo systemctl start haproxy
   ```
   
-### Step 5：安裝 & 設定 Container Runtime
+### Step 6：安裝 & 設定 Container Runtime
 
 > 除了 bastion、haproxy server 這 3 台 VM 之外，在**其他 VM**進行以下操作：
 
@@ -540,7 +567,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   ```
 
 
-### Step 6：啟用必要模組 & 關閉 swap
+### Step 7：啟用必要模組 & 關閉 swap
 
 > 除了 bastion、haproxy server 這 3 台 VM 之外，在**其他 VM**進行以下操作：
 
@@ -579,8 +606,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   # 將 swap 的那一行註解掉
   ```
 
-
-### Step 7：安裝 kubeadm、kubelet、kubectl
+### Step 8：安裝 kubeadm、kubelet、kubectl
 
 > 除了 bastion、haproxy server 這 3 台 VM 之外，**其他 VM 都要**安裝 kubeadm、kubelet、kubectl
 
@@ -630,7 +656,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   kubectl version --client
   ```
 
-### Step 8：初始化 Master node
+### Step 9：初始化 Master node
 
 > 在 **master-1** 上進行以下操作：
 
@@ -688,7 +714,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
   ```
 
-### Step 9：安裝 CNI
+### Step 10：安裝 CNI
 
 > 在 **master-1** 上進行以下操作：
 
@@ -738,7 +764,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   watch kubectl get pods -n calico-system
   ```
 
-### Step 10：加入其他 master node
+### Step 11：加入其他 master node
 
 > 在 **master-2** 與 **master-3** 上進行以下操作：
 
@@ -767,7 +793,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   ```
   > 等待一下後，可以看到 3 台 master node 都是 ready 的狀態。
 
-### Step 11：加入 worker node
+### Step 12：加入 worker node
 
 > 在所有 **worker node** 上進行以下操作：
 
@@ -794,7 +820,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   ```
   > 等待一下後，可以看到所有的 worker node 都是 ready 的狀態。
 
-### Step 12：設定 bastion 的 kubectl
+### Step 13：設定 bastion 的 kubectl
 
 > 在 **bastion** 上進行以下操作：
 
