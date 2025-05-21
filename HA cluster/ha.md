@@ -26,7 +26,6 @@
 
 
 
-
 ## HA cluster 概述
 
 若 k8s cluster 中只有一個 master node (controlplane)，當 master 發生單點故障時將會導致 cluster 無法正常運做，因此在實務上會將 master node 的數量設定為 3 或 5 個，而這樣的 cluster 就稱為 HA cluster (High Availability Cluster)。
@@ -54,17 +53,21 @@
 
     > 對於使用者 or 其他 node 來說，master node 的 IP 其實只是 HAproxy 的 VIP。流量抵達 VIP 後，HAproxy 會將流量轉發到 master node 上的 kube-apiserver。
 
+
 ### 二、Infrastructure
 
-你可以用任意的平台來模擬出多個 VM，用來建置 HA cluster。VM 的數量可依需求調整：
+你可以用任意的平台來模擬出多個 VM，用來建置 HA cluster。以上圖 `haproxy + keepalived` 的組合來說，VM 的數量需求如下：
 
 * 1 台 VM 作為跳板機 (bastion)：日後我們不會直接到 master node 上操作 kubectl 等指令，而是會透過跳板機來操作。
 
 * **至少** 3 台 VM 作為 master node
 
-* **至少** 2 台 VM 作為 HAproxy server
+* **至少** 2 台 VM 作為 HAproxy server。
+  * 若手頭資源有限，也可以將 HAproxy & Keepalived 安裝在 master node 上，直接省去兩台 VM 的需求。
 
 * **至少** 1 台 VM 作為 worker node。
+
+
 
 在 IP 的規劃上，所有 VM 與 VIP 的需要在同一個 subnet 中，範例如下：
 
