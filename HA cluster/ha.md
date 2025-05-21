@@ -44,7 +44,7 @@
 
 * 使用 HAproxy 提供負載平衡的功能，將流量分配到不同的 master node 上。
 
-* 為防止 HAproxy 出現故障，會使用兩台 HAproxy server，兩者皆會安裝 `Keepalived`。
+* 為防止 HAproxy 出現單點故障，會使用兩台 HAproxy server，兩者皆會安裝 `Keepalived`。
   * Keepalived 會管理一個虛擬 IP (VIP)，該虛擬 IP 會隨機綁定到某台 HAproxy server 上。當其中一台 HAproxy server 故障時，另一台 HAproxy server 會自動接管該虛擬 IP，並繼續提供服務。
 
   * 由此可知，當有流量想要進入 master node 時，會先抵達 VIP，然後由 HAproxy 將流量分配到不同的 master node ：
