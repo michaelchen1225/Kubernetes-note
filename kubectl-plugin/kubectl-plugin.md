@@ -1,6 +1,22 @@
 # kubectl plugins
 
-我們可以透過 `plugin` 來擴充 kubectl 的功能，讓管理 cluster 時更加方便。
+> 我們可以透過 `plugin` 來擴充 kubectl 的功能，讓管理 cluster 時更加方便。
+
+## 目錄
+
+* [新增 plugin](#新增-plugin)
+  * [自己寫的 plugin](#自己寫的-plugin)
+  * [使用 krew 安裝 plugin](#使用-krew-安裝-plugin)
+    * [krew 的基本應用](#krew-的基本應用)
+
+* [好用的 plugin list](#好用的-plugin-list)
+  * [ns](#ns)
+  * [pod-lens](#pod-lens)
+  * [iexec](#iexec)
+  * [image](#image)
+  * [view-allocation](#view-allocation)
+  * [sick-pods](#sick-pods)
+  * [status](#status)
 
 ### 新增 plugin
 
@@ -151,6 +167,12 @@ kubectl krew
 
   ```bash
   kubectl krew upgrade
+  ```
+
+* 查看 plugin 的使用說明：
+
+  ```bash
+  kubectl <plugin-name> --help
   ```
 
 ### 好用的 plugin list
@@ -305,12 +327,12 @@ kubectl view-allocation
     ```
     > 如輸出結果所示，有個叫做 `nginx` 的 Pod 狀態為 "NotReady"，原因是 image 拉取失敗。
 
-### status
+#### status
 
 將 Pod 的狀態以及相關事件整理出來，在 debug 時非常有用。
 
 ```bash
-kubectl status pods
+kubectl status pods nginx
 ```
 ```text
 Pod/nginx -n default, created 3m ago, gen:1 Pending BestEffort
@@ -336,6 +358,6 @@ Pod/nginx -n default, created 3m ago, gen:1 Pending BestEffort
   ```
   > 可以看到，nginx Pod 的經歷了 `PodScheduled -> Initialized -> Not ContainersReady -> Not Ready`，且不屬於任何 Deployment、StatefulSet (Standalone POD)，無法啟動的原因是 image 拉取失敗，並且有相關的事件記錄。
 
-  
+
 
 
