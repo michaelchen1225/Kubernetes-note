@@ -1,13 +1,11 @@
 # kubectl plugins
 
-> 我們可以透過 `plugin` 來擴充 kubectl 的功能，讓管理 cluster 時更加方便。
-
 ## 目錄
 
-* [新增 plugin](#新增-plugin)
+* [kubectl plugin](#kubectl-plugin)
   * [自己寫的 plugin](#自己寫的-plugin)
   * [使用 krew 安裝 plugin](#使用-krew-安裝-plugin)
-    * [krew 的基本應用](#krew-的基本應用)
+  * [krew 的基本應用](#krew-的基本應用)
 
 * [好用的 plugin list](#好用的-plugin-list)
   * [ns](#ns)
@@ -18,7 +16,9 @@
   * [sick-pods](#sick-pods)
   * [status](#status)
 
-### 新增 plugin
+### kubectl plugin
+
+我們可以透過 `plugin` 來擴充 kubectl 的功能，讓我們能更方便的管理 cluster。
 
 plugin 說白了就是「執行檔」，一個執行檔要成為 kubectl plugin，必須符合以下規則：
 
@@ -84,9 +84,7 @@ kubectl hello help
 
 ### 使用 krew 安裝 plugin
 
-[krew](https://krew.sigs.k8s.io/) 是 kubectl 的 plugin 管理工具，可以讓我們輕鬆地安裝、更新和管理 kubectl plugins。
-
-> 可以理解成 kubectl plugin 的 apt/yum。
+[krew](https://krew.sigs.k8s.io/) 是 kubectl 的 plugin 管理工具，可以理解成 kubectl plugin 的 apt/yum。
 
 #### 安裝 krew
 
