@@ -1,11 +1,14 @@
 # kubectl plugins
 
+> [Avaliable krew plugins](https://krew.sigs.k8s.io/plugins/)
+
 ## 目錄
 
 * [kubectl plugin](#kubectl-plugin)
   * [自己寫的 plugin](#自己寫的-plugin)
   * [使用 krew 安裝 plugin](#使用-krew-安裝-plugin)
   * [krew 的基本應用](#krew-的基本應用)
+  * [krew plugin list](https://krew.sigs.k8s.io/plugins/)
 
 * [好用的 plugin list](#好用的-plugin-list)
   * [ns](#ns)
@@ -176,6 +179,8 @@ kubectl krew
 ### 好用的 plugin list
 
 這裡整理一些推薦使用的 kubectl plugin，皆可以透過 `krew` 安裝。
+
+> 更多的 plugin 可以參考 [krew plugin list](https://krew.sigs.k8s.io/plugins/)，可以去逛逛看。
 
 #### ns
 
