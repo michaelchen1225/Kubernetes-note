@@ -22,7 +22,7 @@
   * [Step 10：安裝 CNI](#step-10安裝-cni)
   * [Step 11：加入其他 Master node](#step-11加入其他-master-node)
   * [Step 12：加入 Worker node](#step-12加入-worker-node)
-  * [Step 13：檢查 HA cluster](#step-13設定-bastion-的-kubectl)
+  * [Step 13：設定 kubectl](#step-13設定-bastion-的-kubectl)
 
 
 
