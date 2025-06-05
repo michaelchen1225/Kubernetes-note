@@ -851,6 +851,7 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
 * 設定 kubectl 的 alias 為 `k`，並且設定 bash completion：
 
   ```bash
+  echo 'source <(kubectl completion bash)' >>~/.bashrc
   echo "alias k=kubectl" >> ~/.bashrc
   echo "complete -F __start_kubectl k" >> ~/.bashrc
   source ~/.bashrc
