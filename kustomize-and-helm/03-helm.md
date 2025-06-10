@@ -16,7 +16,7 @@
 
 * [建立自己的 helm chart repository：以 Gitlab 為例](#建立自己的-helm-chart-repository以-gitlab-為例)
 
-* [Helm 的常用指令彙整](#helm-的基本指令彙整)
+* [Helm 的常用指令彙整](./helm-cheat-sheet.md)
 
 ### 什麼是 Helm？
 

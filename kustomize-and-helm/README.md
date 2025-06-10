@@ -1,5 +1,7 @@
 ## Kustomize & Helm
 
+> [helm cheat sheet](./helm-cheat-sheet.md)
+
 * [Kustomize 基本概念](00-kustomize-basic.md)
 
 * [Kustomize 基本語法 --- Transformer & Patch](01-kus-syntax.md)
@@ -9,3 +11,4 @@
 * [Helm 基本概念 & 實作](03-helm.md)
 
 * [Helm 與 Kustomize：如何搭配使用](04-helm-vs-kus.md)
+
