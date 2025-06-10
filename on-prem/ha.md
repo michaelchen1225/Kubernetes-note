@@ -24,6 +24,7 @@
   * [Step 12：加入 Worker node](#step-12加入-worker-node)
   * [Step 13：設定 kubectl](#step-13設定-bastion-的-kubectl)
 
+* [Troubleshooting：Worker node 抓不到 VIP](#troubleshootingworker-node-抓不到-vip)
 
 
 ## HA cluster 概述
@@ -872,6 +873,81 @@ OK，這樣就規劃的差不多了，接下來我們就直接開始建置 HA cl
   k get pods
   ```
   > 若有出現 nginx 的 pod 並顯示 running，那就大功告成了！
+
+### Troubleshooting：Worker node 抓不到 VIP
+
+之前有過一段經歷，最初遇到的問題是：
+
+Pod 與 service 建起來後，發現無法使用 service 的 clusterIP 來連線。
+
+一開始我先檢查 service 是否有正確抓到 endpoint：
+
+```bash
+kubectl get ep <svc-name>
+```
+
+結果是正常的，因此我就想到也許是 kube-proxy 的問題，於是去查看 kube-proxy 的 log：
+
+```bash
+kubectl logs -n kube-system <kube-proxy-pod-name>
+```
+
+結果發現類似這樣的錯誤訊息：
+
+```text
+"Failed to watch" err="failed to list *v1.EndpointSlice: Get \"https://10.1.0.15:6443/apis/discovery.k8s.io/v1/endpointslices?labelSelector=%21service.kubernetes.io%2Fheadless%2C%21service.kubernetes.io%2Fservice-proxy-name&limit=500&resourceVersion=0\": net/http: TLS handshake timeout" logger="UnhandledError" reflector="k8s.io/client-go/informers/factory.go:160" type="*v1.EndpointSlice"
+```
+> 10.1.0.15 是 VIP
+
+乍看之下是 kube-proxy 無法連線到 api server，所以我先嘗試重啟 kube-proxy：
+
+```bash
+kubectl delete pod -n kube-system <kube-proxy-pod-name>
+```
+
+結果 worker node 直接變成 not ready 狀態，因此我跑到 worker node 上去檢查 VIP 到底能不能用：
+
+```bash
+ssh worker-1
+curl -k https://10.1.0.15:6443/healthz
+```
+> 6443 為 api server 的 port，/healthz 可用於健檢
+
+結果 curl 卡住了，沒有回傳任何結果，所以我馬上嘗試 `ping <VIP>`，但是居然 ping 的通。最後發現，worker node 的 arp 表中，VIP 對應到的卡號不屬於任何一台 haproxy：
+
+```bash
+ssh worker-1
+arp -n 10.1.0.15 # 取得 VIP 的網卡卡號
+ssh haproxy-1 -- ip a | grep <卡號>
+ssh haproxy-2 -- ip a | grep <卡號>
+```
+> 兩個都 grep 不到任何值
+
+因為 VIP 所對應的卡號不屬於任何一台 haproxy，自然流量就不會導到 master node 上了。因此最後用以下指令清除 worker node 的 arp 表，讓他重新學習：
+
+```bash
+ssh worker-1
+sudo ip neigh flush dev eth0
+```
+> 如果其他 node 也有這個問題，也要做同樣的動作
+
+最後再次檢查 arp 表，如果發現 VIP 有成功對應到某台 haproxy 的 MAC，kube-proxy 的問題就解決了：
+
+```bash
+kubectl logs -n kube-system <kube-proxy-pod-name>
+```
+```text
+I0610 03:03:03.332082       1 shared_informer.go:357] "Caches are synced" controller="node config"
+I0610 03:03:04.431592       1 shared_informer.go:357] "Caches are synced" controller="endpoint slice config"
+I0610 03:03:04.431617       1 shared_informer.go:357] "Caches are synced" controller="service config"
+I0610 03:03:41.232629       1 shared_informer.go:357] "Caches are synced" controller="serviceCIDR config"
+```
+> 正常的 log 應該長這樣
+
+---
+
+
+
 
 ### Ref:
 
