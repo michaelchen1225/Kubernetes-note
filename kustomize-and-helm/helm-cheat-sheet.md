@@ -58,7 +58,7 @@
 
   * [取得 Chart 的 value.yaml](#取得-chart-的-valueyaml)
 
-  * [更新一個 release，且 chart 來源為遠端 repo：](#更新一個-release且-chart-來源為遠端-repo)
+  * [更新一個 release，且 chart 來源為遠端 repo](#更新一個-release且-chart-來源為遠端-repo)
 
 
 
