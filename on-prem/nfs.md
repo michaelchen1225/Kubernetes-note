@@ -2,9 +2,6 @@
 
 > 以下實作如果在 killercoda 上執行，可能會遇到一些權限問題，建議在自己的虛擬機上操錯。
 
-前面雖然建立了一個 local-storage 的 storageClass，但由於使用「kubernetes.io/no-provisioner」作為 provisioner，因此只能達到「分類」、延遲綁定的效果，它只是一個「邏輯上」的 storageClass，並不能像前面介紹的那樣自動建立 PV。
-
-
 這裡選用 [nfs-subdir-external-provisioner](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner) 作為 storageClass 的 provisioner，所以我們得先建置一個 nfs server：
 
 * 在 Master Node 安裝 nfs server 與 nfs client：
